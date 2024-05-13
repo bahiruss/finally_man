@@ -1,7 +1,7 @@
 const User = require('./User');
 
 class Therapist extends User {
-    constructor(therapistId, address, specialization, experience, education){
+    constructor(therapistId, address, specialization, experience, education, availability){
         super();
         this._therapistId = therapistId;
         this._role = 'Therapist'
@@ -9,6 +9,7 @@ class Therapist extends User {
         this._specialization = specialization;
         this._experience = experience;
         this._education = education;
+        this._availability = availability
     }
 
     get therapistId() {
@@ -54,6 +55,15 @@ class Therapist extends User {
     set education(education) {
         this._education = education; 
     }
+
+    get availability() {
+    return this._availability;
+    }
+
+    set availability(availability) {
+    this._availability = availability;
+      }
+    
 }
 
 module.exports = Therapist;
