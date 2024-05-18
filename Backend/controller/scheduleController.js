@@ -1,0 +1,124 @@
+const Schedule = require('../model/Schedule');
+const { v4: uuidv4 } = require('uuid');
+
+class ScheduleController {
+    constructor (db) {
+        this.db = db;
+    }
+
+    getScheduleByTherapistId = async (req, res) => {
+        try {
+            if (!req?.params?.id) {
+                return res.status(400).json({ 'message': 'ID parameter is required' });
+            }
+            const therapistId = req.params.id;
+            const scheduleCollection = await this.db.getDB().collection('schedules');
+            const schedule = await scheduleCollection.findOne({ _therapistId: therapistId },
+                {projection: {
+                    _id: 0, 
+                    scheduleId: "$_scheduleId",
+                    therapistId: "$_therapistId",
+                    oneOnOneAvailability: "$_oneOnOneAvailability",
+                    groupAvailability: "$_groupAvailability"
+                }});
+                if (!schedule) {
+                    return res.status(404).json({ 'message': 'schedule not found' });
+                }
+            res.json(schedule);
+        } catch (error) {
+            console.error('Error fetching schedule by therapist ID:', error);
+            res.status(500).json({ message: 'Failed to fetch schedule by therapist ID' });
+        }
+    }
+
+    createSchedule = async(req, res) => {
+        try {
+            const scheduleData = req.body;
+            const scheduleCollection = await this.db.getDB().collection('schedules');
+
+            //checking if the therapist has entered all the data
+            if (!scheduleData.therapistId || !scheduleData.oneOnOneAvailability || !scheduleData.groupAvailability) {
+                return res.status(400).json({ 'message': 'Missing required fields' });
+            }
+
+            // Check for conflicts between one-on-one and group availability
+            if (this.hasScheduleConflict(scheduleData.oneOnOneAvailability, scheduleData.groupAvailability)) {
+            return res.status(400).json({ 'message': 'Schedule conflicts between one-on-one and group availability' });
+        }
+
+            const schedule = new Schedule();
+            schedule.scheduleId = uuidv4();
+            schedule.therapistId = scheduleData.therapistId;
+            schedule.oneOnOneAvailability = scheduleData.oneOnOneAvailability;
+            schedule.groupAvailability = scheduleData.groupAvailability;
+
+            await scheduleCollection.insertOne(schedule);
+
+            res.status(201).json({ 'message': 'Schedule created successfully' });
+        } catch (error) {
+            console.error('Error creating schedule:', error);
+            res.status(500).json({ 'message': 'Failed to create schedule' });
+        }
+    }
+
+    updateSchedule = async (req, res) => {
+        try {
+            if (!req?.params?.id) {
+                return res.status(400).json({ 'message': 'ID parameter is required' });
+            }
+        
+            const scheduleId = req.params.id;
+            const scheduleData = req.body;
+        
+            const scheduleCollection = await this.db.getDB().collection('schedules');
+
+            const existingSchedule = await scheduleCollection.findOne({ _scheduleId: scheduleId });
+        
+            if (!existingSchedule) {
+                return res.status(404).json({ 'message': 'Schedule not found' });
+            }
+
+            // Check for conflicts between one-on-one and group availability
+            if (this.hasScheduleConflict(scheduleData.oneOnOneAvailability, scheduleData.groupAvailability)) {
+            return res.status(400).json({ 'message': 'Schedule conflicts between one-on-one and group availability' });
+            }
+            
+            const updatedScheduleData = {
+                _oneOnOneAvailability: scheduleData.oneOnOneAvailability || existingSchedule.oneOnOneAvailability,
+                _groupAvailability: scheduleData.groupAvailability || existingSchedule.groupAvailability,
+            };
+
+            
+            const result = await scheduleCollection.updateOne(
+                { _scheduleId: scheduleId },
+                { $set: updatedScheduleData }
+            );
+
+            res.json({ 'message': 'Schedule updated successfully', 'updatedSchedule': updatedScheduleData });
+        } catch (error) {
+            console.error('Error updating schedule:', error);
+            res.status(500).json({ 'message': 'Failed to update schedule' });
+        }
+    }
+
+    hasScheduleConflict = (oneOnOneAvailability, groupAvailability) => {
+        for (const oneOnOneSlot of oneOnOneAvailability) {
+            for (const groupSlot of groupAvailability) {
+                if (oneOnOneSlot.day === groupSlot.day) {
+                    const oneOnOneTimeSlots = new Set(oneOnOneSlot.timeSlots);
+                    const groupTimeSlots = new Set(groupSlot.timeSlots);
+                    const intersection = [...oneOnOneTimeSlots].filter(timeSlot => groupTimeSlots.has(timeSlot));
+                    if (intersection.length > 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+}
+
+
+
+
+module.exports = ScheduleController

@@ -13,9 +13,14 @@ const corsOptions = require('./config/corsOptions');
 // const verifyJWT = require('./middleware/verifyJWT');
 const cookieParser = require('cookie-parser');
 const credentials = require('./middleware/credentials');
+
 const patientRouter = require('./routes/patientRoute');
+const therapistRouter = require('./routes/therapistRoute');
 const administratorRouter = require('./routes/adminstratorRoute');
 const customerAndCrisisSupportRouter = require('./routes/customerAndCrisisSupportRoute')
+const bookingRouter = require('./routes/bookingRoute');
+const therapySessionRouter = require('./routes/therapySessionRoute');
+const scheduleRouter = require('./routes/scheduleRoute');
 // const mongoose = require('mongoose');
 // const connectDB = require('./config/dbConn');
 const PORT = process.env.PORT || 3500;
@@ -44,7 +49,6 @@ const db = new Database();
 (async () => {
     try {
       await db.connectToDB();
-      console.log('Connected to the database');
     } catch (error) {
       console.error(`Error connecting to the database: ${error}`);
       return; // Stop further execution if the database connection fails
@@ -53,20 +57,22 @@ const db = new Database();
 
 
 app.use('/patients', patientRouter(db));
+app.use('/therapists', therapistRouter(db));
+app.use('/schedule', scheduleRouter(db));
 app.use('/administrators', administratorRouter(db));
 app.use('/customerAndCrisisSupport', customerAndCrisisSupportRouter(db));
+app.use('/bookings', bookingRouter(db));
+app.use('/sessions', therapySessionRouter(db));
 
-app.get('/session/:roomId', (req, res) => {
-
-})
 
 
 
 
 io.on('connection', socket => {
-    console.log('connected')
+    // console.log('connected')
     socket.on('join-video-room', (roomId, userId) => {
         socket.join(roomId)
+        console.log(`User ${userId} joined video room ${roomId}`);
         socket.broadcast.to(roomId).emit('user-connected', userId)
 
         socket.on('disconnect', () => {
@@ -85,7 +91,23 @@ io.on('connection', socket => {
             console.log("User Disconnected", socket.id);
           });
     })
-   
+ 
+    //to check last user to update end time of video session
+    socket.on('check-last-user', async (roomId) => {
+      const room = io.sockets.adapter.rooms.get(roomId);
+      if (!room || room.size === 0) {
+        try {
+          const therapySessionsCollection = await db.getDB().collection('therapysessions');
+          await therapySessionsCollection.updateOne(
+            { sessionId: roomId },
+            { $set: { _sessionEndTime: new Date() } }
+          );
+          console.log(`Updated end time for session ${roomId}`);
+        } catch (error) {
+          console.error('Error updating session end time:', error);
+        }
+      }
+    });
 })
 
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

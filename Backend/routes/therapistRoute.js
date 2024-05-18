@@ -7,13 +7,34 @@ const upload = multer();
 
 const therapistRouter = (db) => {
     const therapistController = new TherapistController(db);
+
     router.route('/')
         .get(therapistController.getAllTherapists)
         .post(upload.single('profilePic'), therapistController.createTherapist);
+
+    router.route('/name')
+        .get(therapistController.getTherapistByName);
+
+    router.route('/address')
+        .get(therapistController.getTherapistByAddress);
+
+    router.route('/experience')
+        .get(therapistController.getTherapistByExperience);
+
+    router.route('/specialization')
+        .get(therapistController.getTherapistBySpecialization);
+
+    router.route('/unapproved')
+        .get(therapistController.getUnapprovedTherapists);
+
+    router.route('/approve/:id')
+        .put(therapistController.approveTherapist);
+    
     router.route('/:id')
-        .get(therapistController.getTherapist)
-        .put(upload.single('profilePic'), therapistController.updateTherapist)
-        .delete(therapistController.deleteTherapist)
+    .get(therapistController.getTherapistById)
+    .put(upload.single('profilePic'), therapistController.updateTherapist)
+    .delete(therapistController.deleteTherapist)
+    
 
     return router;
 }

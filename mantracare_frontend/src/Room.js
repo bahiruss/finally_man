@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import Video from './Video';
 import { FaVideo, FaPhone, FaMicrophone, FaMicrophoneSlash, FaVideoSlash } from 'react-icons/fa';
+import { useParams } from 'react-router-dom';
 
 
 const myPeer = new Peer(undefined, {
@@ -25,7 +26,8 @@ async function getUserMedia() {
   }
 }
 
-const Room = ({roomId, socket}) => {
+const Room = ({socket}) => {
+  const roomId = useParams();
   const [peers, setPeers] = useState({});
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
@@ -37,6 +39,7 @@ const Room = ({roomId, socket}) => {
     const videoGrid = videoGridRef.current;
     const myVideo = myVideoRef.current;
     let myStream;
+    
 
     (async () => {
       try {
@@ -61,6 +64,7 @@ const Room = ({roomId, socket}) => {
         });
 
         socket.on('user-connected', (userId) => {
+          console.log(`User connected: ${userId}`);
           connectToNewUser(userId, myStream);
         });
       } catch (error) {
@@ -69,6 +73,7 @@ const Room = ({roomId, socket}) => {
     })();
 
     socket.on('user-disconnected', (userId) => {
+      console.log(`User disconnected: ${userId}`); // Add logging
       setPeers((prevPeers) => {
         // Create a copy of previous peers
         const updatedPeers = { ...prevPeers };
@@ -79,11 +84,14 @@ const Room = ({roomId, socket}) => {
           delete updatedPeers[userId];
         }
         return updatedPeers;
+         // Emit an event to the server when a user disconnects to
+         socket.emit('check-last-user', roomId);
       });
     });
 
     myPeer.on('open', (id) => {
-      socket.emit('join-video-room', roomId, id);
+      console.log(`Peer opened with ID: ${id}`); // Add logging
+      socket.emit('join-video-room', roomId.roomId, id);
     });
 
     return () => {
@@ -91,7 +99,7 @@ const Room = ({roomId, socket}) => {
         track.stop();
       });
     };
-  }, []); // Empty dependency array for initial mount only
+  }, [roomId, socket]); // Empty dependency array for initial mount only
 
   function connectToNewUser(userId, stream) {
     console.log(`Connecting to new user: ${userId}`);

@@ -1,49 +1,62 @@
 import './App.css';
 import { io } from 'socket.io-client';
+import {  BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
+
 import Room from './Room';
-import {FaPaperPlane} from 'react-icons/fa';
-import { useEffect, useState } from 'react';
+import TextChat from './TextChat';
+import AppointmentsPage from './AppointmentPage';
 
 const socket = io('http://localhost:3500');
 
 function App() {
-  const roomId = "1234";
-  // const [message, setMessage] = useState('');
-  // const [messageList, setMessageList] = useState([]);
-
-  // //make sure you get the username properly
-  // const username = 'abebe';
-
-  // const sendMessage = async () => {
-  //   if(message !== '') {
-  //     const messageData = {
-  //       username,
-  //       message,
-  //       time: 
-  //       new Date(Date.now()).getHours() +
-  //       ":" +
-  //       new Date(Date.now()).getMinutes(),
-  //   };
-
-  //   await socket.emit('send-message', messageData);
-  //   setMessageList((list) => [...list, messageData]);
-  //   setMessage('');
-  // }
-  // }
-
-  // useEffect(()=>{
-  //   //you add the real room over here
-  // socket.emit('join-chat-room', roomId);
-  // },[])
-
-  // useEffect(() => {
-  //   socket.on('receive-message', (receivedData) => {
-  //     setMessageList((list) => [...list, receivedData]);
-  //   });
-  // }, [socket]);
+  const userId = 'c7cb7dc6-0a8b-48f9-bac6-2c1ec1e7ee55';
   
  return(
-  <Room roomId={roomId} socket={socket}/>
+  <Router>
+    <Routes>
+      <Route path='/room/video/:roomId' element= {<Room  socket={socket}/>} />
+      <Route path='/room/text/:roomId' element= {<TextChat  socket={socket}/>} />
+      <Route path='/appointments' element= {<AppointmentsPage  userId={userId}/>} />
+    </Routes>
+  </Router>
+   )
+  }
+  export default App;
+
+// const roomId = "1234";
+// const [message, setMessage] = useState('');
+// const [messageList, setMessageList] = useState([]);
+
+// //make sure you get the username properly
+// const username = 'abebe';
+
+// const sendMessage = async () => {
+//   if(message !== '') {
+//     const messageData = {
+//       username,
+//       message,
+//       time: 
+//       new Date(Date.now()).getHours() +
+//       ":" +
+//       new Date(Date.now()).getMinutes(),
+//   };
+
+//   await socket.emit('send-message', messageData);
+//   setMessageList((list) => [...list, messageData]);
+//   setMessage('');
+// }
+// }
+
+// useEffect(()=>{
+//   //you add the real room over here
+// socket.emit('join-chat-room', roomId);
+// },[])
+
+// useEffect(() => {
+//   socket.on('receive-message', (receivedData) => {
+//     setMessageList((list) => [...list, receivedData]);
+//   });
+// }, [socket]);
   // <div id='text-chat-container'>
   //   <div id='text-chat-header'></div>
   //   <div id='text-chat-body'>
@@ -79,6 +92,3 @@ function App() {
   //     <button onClick={sendMessage}><FaPaperPlane /></button>
   //   </div>
   // </div>
- )
-}
-export default App;

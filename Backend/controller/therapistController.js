@@ -15,7 +15,7 @@ class TherapistController {
             const therapistCollection = await this.db.getDB().collection('therapists');
 
             //find and also do projection
-            const therapists = await therapistCollection.find({},  {
+            const therapists = await therapistCollection.find({_approved: true},  {
                 projection: {
                     _id: 0, 
                     userId: "$_userId", 
@@ -48,12 +48,12 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _therapistId: req.params.id },
+            const therapist = await therapistCollection.findOne({ _therapistId: req.params.id},
                 {projection: {
                     _id: 0, 
                     userId: "$_userId", 
                     username: "$_username",
-                    password: "$_password", // **Keep hashed password for security reasons**
+                    password: "$_password", 
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -65,7 +65,6 @@ class TherapistController {
                     address: "$_address",
                     specialization: "$_specialization",
                     experience: "$_experience",
-                    education: "$_education",
                     education: "$_education",
                   },
         });
@@ -86,12 +85,12 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _name: { $regex: new RegExp(req.body.name, 'i') } },
+            const therapist = await therapistCollection.find({ _name: { $regex: new RegExp(req.body.name, 'i') }, _approved: true },
                 {projection: {
                     _id: 0, 
                     userId: "$_userId", 
                     username: "$_username",
-                    password: "$_password", // **Keep hashed password for security reasons**
+                    password: "$_password", // 
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -103,7 +102,6 @@ class TherapistController {
                     address: "$_address",
                     specialization: "$_specialization",
                     experience: "$_experience",
-                    availability: "$_availability",
                   },
         });
         
@@ -123,7 +121,7 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _address: req.body.address },
+            const therapist = await therapistCollection.find({ _address: new RegExp(req.query.address, 'i'), _approved: true },
                 {projection: {
                     _id: 0, 
                     userId: "$_userId", 
@@ -141,7 +139,6 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                    availability: "$_availability",
                   },
         });
         
@@ -160,7 +157,7 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _experience: req.body.experience },
+            const therapist = await therapistCollection.find({ _experience: req.body.experience, _approved: true },
                 {projection: {
                     _id: 0, 
                     userId: "$_userId",
@@ -178,7 +175,6 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                    availability: "$_availability",
                   },
         });
         
@@ -197,7 +193,7 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _specialization: req.body.specialization },
+            const therapist = await therapistCollection.find({ _specialization: req.body.specialization, _approved: true },
                 {projection: {
                     _id: 0, 
                     userId: "$_userId", 
@@ -215,7 +211,6 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                    availability: "$_availability",
                   },
         });
         
@@ -239,7 +234,7 @@ class TherapistController {
             const administratorCollection = await this.db.getDB().collection('administrators');
 
             //checking if the therapist has entered all the data
-            if (!therapistData.username || !therapistData.password || !therapistData.email || !therapistData.name || !therapistData.dateOfBirth || !therapistData.phoneNumber || !therapistData.address || !therapistData.specialization || !therapistData.experience || !therapistData.education || !therapist.availability) {
+            if (!therapistData.username || !therapistData.password || !therapistData.email || !therapistData.name || !therapistData.dateOfBirth || !therapistData.phoneNumber || !therapistData.address || !therapistData.specialization || !therapistData.experience || !therapistData.education) {
                 return res.status(400).json({ 'message': 'Missing required fields' });
             }
 
@@ -275,7 +270,6 @@ class TherapistController {
             therapist.specialization = therapistData.specialization;
             therapist.experience = therapistData.experience;
             therapist.education = therapistData.education;
-            therapist.availability = therapistData.availability;
 
             if (req.file) {
                 const profilePic = {
@@ -289,6 +283,7 @@ class TherapistController {
 
             res.status(201).json({ 'message': 'Therapist created successfully' });
             } catch (error) {
+                console.error('Error creating therapist:', error);
                 res.status(500).json({ 'message': 'Failed to create therapist' });
             }
       }
@@ -346,7 +341,6 @@ class TherapistController {
                 _specialization: therapistData.specialization || existingTherapist.specialization,
                 _experience: therapistData.experience || existingTherapist.experience,
                 _education: therapistData.education || existingTherapist.education,
-                _availability: therapistData.availability || existingTherapist.availability,
             };
             
 
@@ -398,6 +392,63 @@ class TherapistController {
             res.json( { "message": 'Therapist successfully deleted ' });
             } catch (error) {
                 res.status(500).json({ 'message': 'Failed to delete therapist' });
+            }
+        }
+
+        getUnapprovedTherapists = async (req, res) => {
+            try {
+                const therapistCollection = await this.db.getDB().collection('therapists');
+                const unapprovedTherapists = await therapistCollection.find({ _approved: false }, {
+                    projection: {
+                        _id: 0,
+                        userId: "$_userId",
+                        username: "$_username",
+                        password: "$_password",
+                        email: "$_email",
+                        name: "$_name",
+                        dateOfBirth: "$_dateOfBirth",
+                        phoneNumber: "$_phoneNumber",
+                        registrationDate: "$_registrationDate",
+                        profilePic: "$_profilePic",
+                        therapistId: "$_therapistId",
+                        role: "$_role",
+                        address: "$_address",
+                        specialization: "$_specialization",
+                        experience: "$_experience",
+                        education: "$_education",
+                        approved: "$_approved"
+                    },
+                }).toArray();
+    
+                if (!unapprovedTherapists.length) {
+                    return res.status(204).json({ 'message': 'No unapproved therapists found' });
+                }
+    
+                res.json(unapprovedTherapists);
+            } catch (error) {
+                res.status(500).json({ 'message': 'Failed to fetch unapproved therapists' });
+            }
+        }
+    
+        approveTherapist = async (req, res) => {
+            try {
+                if (!req?.params?.id) {
+                    return res.status(400).json({ 'message': 'ID parameter is required' });
+                }
+    
+                const therapistCollection = await this.db.getDB().collection('therapists');
+                const result = await therapistCollection.updateOne(
+                    { _therapistId: req.params.id },
+                    { $set: { _approved: true } }
+                );
+    
+                if (result.modifiedCount === 0) {
+                    return res.status(404).json({ 'message': 'Therapist not found or already approved' });
+                }
+    
+                res.json({ 'success': 'Therapist approved successfully' });
+            } catch (error) {
+                res.status(500).json({ 'message': 'Failed to approve therapist' });
             }
         }
     }

@@ -2,63 +2,143 @@ const Booking = require('../model/Booking');
 const { v4: uuidv4 } = require('uuid');
 
 class BookingController {
-    getBookingsByPatientId = async(req, res) => {
+    constructor (db) {
+        this.db = db;
+    } 
+    getBookingsByUserId = async(req, res) => {
         try {
+
+            const sessionMode = req.params.sessionMode;
+
+            const patientCollection = await this.db.getDB().collection('patients');
+            const therapistCollection = await this.db.getDB().collection('therapists');
+            
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
+            const patient = await patientCollection.findOne({_userId : req.params.id });
+            const therapist = await therapistCollection.findOne({_userId : req.params.id });
+            
+
             const bookingCollection = await this.db.getDB().collection('bookings');
-            const bookings = await bookingCollection.find({_patientId: req.params.id},{
-                projection: {
-                    bookingId: '$_bookingId',
-                    patientId: '$_patientId',
-                    patientName: '$_patientName',
-                    therapistId: '$_therapistId',
-                    therapistName: '$_therapistName',
-                    date: '$_date',
-                    timeSlot: '$_timeSlot',
-                    isCanceled: '$_isCanceled',
-                    canceledBy: '$_canceledBy',
 
-                }
-            }).toArray()
+            //if userId is that of a patient
+            if(patient){
+                const bookings = await bookingCollection.find({'_patientInfo.id': patient._patientId, _sessionMode: sessionMode },{
+                    projection: {
+                        bookingId: '$_bookingId',
+                        patientInfo: '$_patientInfo',
+                        therapistId: '$_therapistId',
+                        therapistName: '$_therapistName',
+                        date: '$_date',
+                        timeSlot: '$_timeSlot',
+                        sessionType: '$_sessionType',
+                        sessionMode: '$_sessionMode',
+                        isCanceled: '$_isCanceled',
+                        canceledBy: '$_canceledBy',
+    
+                    }
+                }).toArray()
+                
+    
+                if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
+                    res.json(bookings);
+    
+            }
 
-            if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
-                res.json(bookings);
-
+            //if userId is of a therapist
+            if (therapist) {
+                const bookings = await bookingCollection.find({_therapistId: therapist._therapistId, _sessionMode: sessionMode},{
+                    projection: {
+                        bookingId: '$_bookingId',
+                        patientInfo: '$_patientInfo',
+                        therapistId: '$_therapistId',
+                        therapistName: '$_therapistName',
+                        date: '$_date',
+                        timeSlot: '$_timeSlot',
+                        sessionType: '$_sessionType',
+                        sessionMode: '$_sessionMode',
+                        isCanceled: '$_isCanceled',
+                        canceledBy: '$_canceledBy',
+    
+                    }
+                }).toArray()
+    
+                if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
+                    res.json(bookings);
+            }
+            
             } catch (error) {
                 res.status(500).json({ 'message': 'Failed to fetch bookings' });
         }
 }
 
-    getBookingsBytherapistId = async(req, res) => {
+    getBookingsBySessionType = async (req, res) => {
         try {
+            const sessionType = req.params.sessionType;
+            const sessionMode = req.params.sessionMode;
+
+            const patientCollection = await this.db.getDB().collection('patients');
+            const therapistCollection = await this.db.getDB().collection('therapists');
+            
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
+
+            const patient = await patientCollection.findOne({_userId : req.params.id });
+            const therapist = await therapistCollection.findOne({_userId : req.params.id });
+
             const bookingCollection = await this.db.getDB().collection('bookings');
-            const bookings = await bookingCollection.find({_therapistId: req.params.id},{
-                projection: {
-                    bookingId: '$_bookingId',
-                    patientId: '$_patientId',
-                    patientName: '$_patientName',
-                    therapistId: '$_therapistId',
-                    therapistName: '$_therapistName',
-                    date: '$_date',
-                    timeSlot: '$_timeSlot',
-                    isCanceled: '$_isCanceled',
-                    canceledBy: '$_canceledBy',
 
-                }
-            }).toArray()
+            //if userId is that of a patient
+            if(patient){
+                const bookings = await bookingCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: sessionType, _sessionMode: sessionMode },{
+                    projection: {
+                        bookingId: '$_bookingId',
+                        patientInfo: '$_patientInfo',
+                        therapistId: '$_therapistId',
+                        therapistName: '$_therapistName',
+                        date: '$_date',
+                        timeSlot: '$_timeSlot',
+                        sessionType: '$_sessionType',
+                        sessionMode: '$_sessionMode',
+                        isCanceled: '$_isCanceled',
+                        canceledBy: '$_canceledBy',
+    
+                    }
+                }).toArray()
+    
+                if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
+                    res.json(bookings);
+    
+            }
 
-            if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
-                res.json(bookings);
+            //if userId is of a therapist
+            if (therapist) {
+                const bookings = await bookingCollection.find({ _therapistId: therapist._therapistId, _sessionType: sessionType, _sessionMode: sessionMode },{
+                    projection: {
+                        bookingId: '$_bookingId',
+                        patientInfo: '$_patientInfo',
+                        therapistId: '$_therapistId',
+                        therapistName: '$_therapistName',
+                        date: '$_date',
+                        timeSlot: '$_timeSlot',
+                        sessionType: '$_sessionType',
+                        sessionMode: '$_sessionMode',
+                        isCanceled: '$_isCanceled',
+                        canceledBy: '$_canceledBy',
+    
+                    }
+                }).toArray()
+    
+                if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
+                    res.json(bookings);
+            }       
 
-            } catch (error) {
-                res.status(500).json({ 'message': 'Failed to fetch bookings' });
+        } catch(error) {
+            res.status(500).json({ 'message': 'Failed to fetch bookings' });
         }
-}
+    }
 
     getBookingById = async (req, res) => {
         try {
@@ -70,12 +150,13 @@ class BookingController {
             const booking = await bookingCollection.findOne({ _bookingId: req.params.id }, {
                     projection: {
                         bookingId: '$_bookingId',
-                        patientId: '$_patientId',
-                        patientName: '$_patientName',
+                        patientInfo: '$_patientInfo',
                         therapistId: '$_therapistId',
                         therapistName: '$_therapistName',
                         date: '$_date',
                         timeSlot: '$_timeSlot',
+                        sessionType: '$_sessionType',
+                        sessionMode: '$_sessionMode',
                         isCanceled: '$_isCanceled',
                         canceledBy: '$_canceledBy',
     
@@ -96,56 +177,318 @@ class BookingController {
     createBooking = async (req, res) => {
         try {
             const bookingCollection = await this.db.getDB().collection('bookings');
+            const patientCollection = await this.db.getDB().collection('patients');
+            const scheduleCollection = await this.db.getDB().collection('schedules');
+    
             const bookingData = req.body;
-
-            //check if all fields are there
-            if(!bookingData.patientId || !bookingData.patientName ||
-            !bookingData.therapistId || !bookingData.therapistName ||
-            !bookingData.date || !bookingData.timeSlot || 
-            !bookingData.isCanceled || !bookingData.canceledBy){
-                return res.status(400).json({ 'message': 'Missing required fields' });
+    
+            const patient = await patientCollection.findOne({ _userId: bookingData.userId });
+            if (!patient) {
+                return res.status(400).json({ message: 'Patient not found' });
             }
-
-            //check if the booking exists
-            const existingBooking = await bookingCollection.findOne({
-                _therapistId: bookingData.patientId,
+    
+            // Check if all fields are present
+            const requiredFields = ['therapistId', 'therapistName', 'date', 'timeSlot'];
+            if (!requiredFields.every(field => bookingData[field])) {
+                return res.status(400).json({ message: 'Missing required fields' });
+            }
+    
+            const bookingDate = new Date(bookingData.date);
+            const currentDate = new Date();
+            if (bookingDate < currentDate) {
+                return res.status(400).json({ message: 'Booking date cannot be in the past' });
+            }
+    
+            // Find therapist to check availability
+            const therapist = await this.db.getDB().collection('therapists').findOne({
+                _therapistId: bookingData.therapistId,
+            });
+    
+            if (!therapist) {
+                return res.status(400).json({ message: 'Therapist not found' });
+            }
+            
+            // Check therapist's availability for the specified day and time slot
+            
+            const bookingWeekday = bookingDate.toLocaleDateString('en-US', { weekday: 'long' });
+            const therapistSchedule = await scheduleCollection.findOne({_therapistId: therapist._therapistId});
+    
+            let sessionMode = '';
+    
+            if (therapistSchedule) {
+                const { _oneOnOneAvailability, _groupAvailability } = therapistSchedule;
+                const availabilityForDay = _oneOnOneAvailability.find(avail => avail.day.toLowerCase() === bookingWeekday.toLowerCase());
+                
+                if (availabilityForDay && availabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
+                    sessionMode = 'one-on-one';
+                } else {
+                    const _groupAvailabilityForDay = _groupAvailability.find(avail => avail.day.toLowerCase() === bookingWeekday.toLowerCase());
+                    if (_groupAvailabilityForDay && _groupAvailabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
+                        sessionMode = 'group';
+                    }
+                }
+            }
+    
+            if (!sessionMode) {
+                return res.status(400).json({ message: 'Therapist not available at the specified time' });
+            }
+    
+            // Check if the booking exists for one-on-one
+            if (sessionMode === 'one-on-one') {
+                const existingBooking = await bookingCollection.findOne({
+                    _therapistId: bookingData.therapistId,
+                    _date: bookingData.date,
+                    _timeSlot: bookingData.timeSlot,
+                    _sessionType: bookingData.sessionType
+                });
+    
+                if (existingBooking) {
+                    return res.status(400).json({ message: 'Slot already booked' });
+                }
+            }
+    
+            // Check if there is an existing group booking
+            let existingGroupBooking = await bookingCollection.findOne({
+                _therapistId: bookingData.therapistId,
                 _date: bookingData.date,
-                _timeSlot: bookingData.timeSlot
-            })
-
-            if(existingBooking) {
-                return res.status(400).json({'message': 'Slot already booked'});
+                _timeSlot: bookingData.timeSlot,
+                _sessionType: bookingData.sessionType,
+                _sessionMode: 'group'
+            });
+            console.log(existingGroupBooking)
+    
+            // If a group booking exists, update it to include the new patient if not already included
+            if (existingGroupBooking) {
+                if (existingGroupBooking._patientInfo.some(p => p.id === patient._patientId)) {
+                    return res.status(400).json({ message: 'Patient already included in this group booking' });
+                } else {
+                    await bookingCollection.updateOne(
+                        { _id: existingGroupBooking._id },
+                        { $push: { _patientInfo: { id: patient._patientId, name: patient._name } } }
+                    );
+                    return res.status(200).json({ message: 'Patient added to existing group booking' });
+                }
             }
-
-            //create a booking object 
+    
+            // Create a new booking object if there's no existing group booking
             const booking = new Booking();
-            booking.bookingId = uuidv4()
-            booking.patientId = bookingData.patientId;
-            booking.patientName = bookingData.patientName; 
-            booking.therapistId = bookingData.therapistId; 
+            booking.bookingId = uuidv4();
+            booking.patientInfo = [{ id: patient._patientId, name: patient._name }];
+            booking.therapistId = bookingData.therapistId;
             booking.therapistName = bookingData.therapistName;
-            booking.date = bookingData.date; 
+            booking.date = bookingData.date;
             booking.timeSlot = bookingData.timeSlot;
-            booking.isCanceled = bookingData.isCanceled;
-            booking.canceledBy = bookingData.canceledBy;
-
+            booking.sessionType = bookingData.sessionType;
+            booking.sessionMode = sessionMode;
+    
             await bookingCollection.insertOne(booking);
-
-            res.status(201).json({ 'message': 'Booking created successfully' });
+    
+            res.status(201).json({ message: 'Booking created successfully' });
         } catch (error) {
-            res.status(500).json({ 'message': 'Failed to create booking' });
+            console.error(error);
+            res.status(500).json({ message: 'Failed to create booking' });
         }
     }
+    
+
+    // createBooking = async (req, res) => {
+    //     try {
+    //         const bookingCollection = await this.db.getDB().collection('bookings');
+    //         const patientCollection = await this.db.getDB().collection('patients');
+    //         const scheduleCollection = await this.db.getDB().collection('schedules');
+    
+    //         const bookingData = req.body;
+    
+    //         const patient = await patientCollection.findOne({_userId : bookingData.userId });
+    //         if(!patient) {
+    //             return res.status(400).json({message: 'Patient not found'});
+    //         }
+    
+    //         // Check if all fields are present
+    //         const requiredFields = ['therapistId', 'therapistName', 'date', 'timeSlot'];
+    //         if(!requiredFields.every(field => bookingData[field])) {
+    //             return res.status(400).json({ 'message': 'Missing required fields' });
+    //         }
+
+    //         const bookingDate = new Date(bookingData.date);
+    //         const currentDate = new Date();
+    //         if (bookingDate < currentDate) {
+    //         return res.status(400).json({ message: 'Booking date cannot be in the past' });
+    //         }
+    
+    //         // Check if the booking exists
+    //         const existingBooking = await bookingCollection.findOne({
+    //             _therapistId: bookingData.therapistId,
+    //             _date: bookingData.date,
+    //             _timeSlot: bookingData.timeSlot,
+    //             _sessionType: bookingData.sessionType
+    //         });
+    
+    //         if(existingBooking) {
+    //             return res.status(400).json({'message': 'Slot already booked'});
+    //         }
+    
+    //         // Find therapist to check availability
+    //         const therapist = await this.db.getDB().collection('therapists').findOne({
+    //             _therapistId: bookingData.therapistId,
+    //         });
+    
+    //         if (!therapist) {
+    //             return res.status(400).json({ message: 'Therapist not found' });
+    //         }
+            
+    //         // Check therapist's availability for the specified day and time slot
+            
+    //         const bookingWeekday = bookingDate.toLocaleDateString('en-US', { weekday: 'long' });
+    //         const therapistSchedule = await scheduleCollection.findOne({_therapistId: therapist._therapistId});
+            
+    
+    //         let sessionMode = '';
+    
+    //         if (therapistSchedule) {
+    //             const { _oneOnOneAvailability, _groupAvailability } = therapistSchedule;
+    //             const availabilityForDay = _oneOnOneAvailability.find(avail => avail.day.toLowerCase() === bookingWeekday.toLowerCase());
+                
+    //             if (availabilityForDay && availabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
+    //                 sessionMode = 'one-on-one';
+    //             } else {
+    //                 const _groupAvailabilityForDay = _groupAvailability.find(avail => avail.day.toLowerCase() === bookingWeekday.toLowerCase());
+    //                 if (_groupAvailabilityForDay && _groupAvailabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
+    //                     sessionMode = 'group';
+    //                 }
+    //             }
+    //         }
+    
+    //         if (!sessionMode) {
+    //             return res.status(400).json({ message: 'Therapist not available at the specified time' });
+    //         }
+    
+    //         // Create a booking object
+    //         const booking = new Booking();
+    //         booking.bookingId = uuidv4();
+    //         booking.patientInfo = { id: patient._patientId, name: patient._name };
+    //         booking.therapistId = bookingData.therapistId; 
+    //         booking.therapistName = bookingData.therapistName;
+    //         booking.date = bookingData.date; 
+    //         booking.timeSlot = bookingData.timeSlot;
+    //         booking.sessionType = bookingData.sessionType;
+    //         booking.sessionMode = sessionMode; 
+    
+    //         await bookingCollection.insertOne(booking);
+    
+    //         res.status(201).json({ 'message': 'Booking created successfully' });
+    //     } catch (error) {
+    //         console.error(error);
+    //         res.status(500).json({ 'message': 'Failed to create booking' });
+    //     }
+    // }
+    
+
+    // createBooking = async (req, res) => {
+    //     try {
+    //         const bookingCollection = await this.db.getDB().collection('bookings');
+    //         const patientCollection = await this.db.getDB().collection('patients');
+
+    //         const bookingData = req.body;
+
+    //         const patient = await patientCollection.findOne({_userId : bookingData.userId });
+    //         if(!patient) {
+    //             return res.status(400).json({message: 'patient not found'})
+    //         }
+
+    //         //check if all fields are there
+    //         if(
+    //         !bookingData.therapistId || !bookingData.therapistName ||
+    //         !bookingData.date || !bookingData.timeSlot){
+    //             return res.status(400).json({ 'message': 'Missing required fields' });
+    //         }
+
+    //         //check if the booking exists
+    //         const existingBooking = await bookingCollection.findOne({
+    //             _therapistId: bookingData.therapistId,
+    //             _date: bookingData.date,
+    //             _timeSlot: bookingData.timeSlot,
+    //             _sessionType: bookingData.sessionType
+    //         })
+
+    //         if(existingBooking) {
+    //             return res.status(400).json({'message': 'Slot already booked'});
+    //         }
+
+    //         const therapist = await this.db.getDB().collection('therapists').findOne({
+    //             _therapistId: bookingData.therapistId,
+    //         });
+    
+    //         if (!therapist) {
+    //             return res.status(400).json({ message: 'Therapist not found' });
+    //         }
+            
+    //         // To check if an appropriate date has been filled by patient
+    //         const bookingDate = new Date(bookingData.date);
+    //         const bookingWeekday = bookingDate.toLocaleDateString('en-US', { weekday: 'long' });
+
+    //         const therapistAvailability = therapist._availability;
+    //         // Find the availability for the weekday
+    //         const availabilityForDay = therapistAvailability.find(availability => availability.day.toLowerCase() === bookingWeekday.toLowerCase());
+
+    //         if (!availabilityForDay) {
+    //         return res.status(400).json({ message: 'Therapist not available on the specified day' });
+    //         }
+
+    //         // Check if the specified time slot is available
+    //         if (!availabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
+    //         return res.status(400).json({ message: 'Therapist not available at the specified time' });
+    //         }
+
+
+
+    //         //create a booking object 
+    //         const booking = new Booking();
+    //         booking.bookingId = uuidv4()
+    //         booking.patientId = patient._patientId;
+    //         booking.patientName = patient._name; 
+    //         booking.therapistId = bookingData.therapistId; 
+    //         booking.therapistName = bookingData.therapistName;
+    //         booking.date = bookingData.date; 
+    //         booking.timeSlot = bookingData.timeSlot;
+    //         booking.sessionType = bookingData.sessionType;
+
+    //         await bookingCollection.insertOne(booking);
+
+    //         res.status(201).json({ 'message': 'Booking created successfully' });
+    //     } catch (error) {
+    //         console.log(error)
+    //         res.status(500).json({ 'message': 'Failed to create booking' });
+    //     }
+    // }
 
     cancelBooking = async (req, res) => {
         try {
-            const { bookingId } = req.params;
-            const { canceledBy } = req.body;
+            if (!req.params.id) {
+                return res.status(400).json({ message: 'Booking ID parameter is required' });
+            }
+            const { userId } = req.body;
 
             const bookingCollection = await this.db.getDB().collection('bookings');
+            const patientCollection = await this.db.getDB().collection('patients');
+            const therapistCollection = await this.db.getDB().collection('therapists');
+
+            //try to find who canceled
+            const therapist = await therapistCollection.findOne({_userId : userId });
+            const patient = await patientCollection.findOne({_userId : userId });
+
+            let canceledBy;
+            if (therapist) {
+                canceledBy = therapist._name;
+            }
+            console.log(therapist)
+            if (patient) {
+                canceledBy = patient._name;
+            }
+
             const booking = await bookingCollection.findOneAndUpdate(
-                { _id: bookingId },
-                { $set: { isCanceled: true, canceledBy } }
+                { _bookingId: req.params.id },
+                { $set: { _isCanceled: true, _canceledBy: canceledBy } }
             );
 
             if (!booking) {
@@ -154,6 +497,7 @@ class BookingController {
 
             res.json({ 'message': 'Booking canceled successfully' });
         } catch (error) {
+            
             console.error('Error canceling booking:', error);
             res.status(500).json({ 'message': 'Server Error in canceling booking' });
         }

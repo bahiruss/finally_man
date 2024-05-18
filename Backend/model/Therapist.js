@@ -9,7 +9,7 @@ class Therapist extends User {
         this._specialization = specialization;
         this._experience = experience;
         this._education = education;
-        this._availability = availability
+        this._approved = false;
     }
 
     get therapistId() {
@@ -56,13 +56,13 @@ class Therapist extends User {
         this._education = education; 
     }
 
-    get availability() {
-    return this._availability;
+    get approved() {
+        return this._approved;
     }
 
-    set availability(availability) {
-    this._availability = availability;
-      }
+    set approved(approved) {
+        this._approved = approved;
+    }
     
 }
 

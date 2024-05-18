@@ -1,12 +1,13 @@
 class Booking {
-    constructor(bookingId, patientId, patientName, therapistId, therapistName, date, timeSlot) {
+    constructor(bookingId, patientInfo, therapistId, therapistName, date, timeSlot, sessionType, sessionMode) {
         this._bookingId = bookingId;
-        this._patientId = patientId;
-        this._patientName = patientName;
+        this._patientInfo = patientInfo;
         this._therapistName = therapistName
         this._therapistId = therapistId;
         this._date = date;
         this._timeSlot = timeSlot;
+        this._sessionType = sessionType;
+        this._sessionMode = sessionMode;
         this._isCanceled = false; 
         this._canceledBy = '';
     }
@@ -17,20 +18,13 @@ class Booking {
     set bookingId(bookingId) {
         this._bookingId = bookingId;
     }
-    get patientId() {
-        return this._patientId;
-    }
-    
-    set patientId(patientId) {
-        this._patientId = patientId;
+
+    get patientInfo() {
+        return this._patientInfo;
     }
 
-    get patientName() {
-        return this._patientName;
-    }
-
-    set patientName(patientName) {
-    this._patientName = patientName;
+    set patientInfo(patientInfo) {
+    this._patientInfo = patientInfo;
     }
 
     get therapistId() {
@@ -64,6 +58,23 @@ class Booking {
     set timeSlot(timeSlot) {
         this._timeSlot = timeSlot;
     }
+
+    get sessionType() {
+        return this._sessionType;
+    }
+
+    set sessionType(sessionType) {
+        this._sessionType = sessionType;
+    }
+
+    get sessionMode() {
+        return this._sessionMode;
+    }
+
+    set sessionMode(sessionMode) {
+        this._sessionMode = sessionMode;
+    }
+
 
     get isCanceled() {
         return this._isCanceled;
