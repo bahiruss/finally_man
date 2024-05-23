@@ -101,6 +101,35 @@ class ScheduleController {
         }
     }
 
+    deleteSchedule = async (req, res) => {
+        try {
+            if (!req?.params?.id) {
+                return res.status(400).json({ 'message': 'ID parameter is required' });
+            }
+    
+            const scheduleId = req.params.id;
+    
+            const scheduleCollection = await this.db.getDB().collection('schedules');
+    
+            const existingSchedule = await scheduleCollection.findOne({ _scheduleId: scheduleId });
+    
+            if (!existingSchedule) {
+                return res.status(404).json({ 'message': 'Schedule not found' });
+            }
+    
+            const result = await scheduleCollection.deleteOne({ _scheduleId: scheduleId });
+    
+            if (result.deletedCount === 1) {
+                return res.json({ 'message': 'Schedule deleted successfully' });
+            } else {
+                return res.status(500).json({ 'message': 'Failed to delete schedule' });
+            }
+        } catch (error) {
+            console.error('Error deleting schedule:', error);
+            res.status(500).json({ 'message': 'Failed to delete schedule' });
+        }
+    }
+    
     hasScheduleConflict = (oneOnOneAvailability, groupAvailability) => {
         for (const oneOnOneSlot of oneOnOneAvailability) {
             for (const groupSlot of groupAvailability) {

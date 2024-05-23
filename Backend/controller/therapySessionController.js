@@ -26,6 +26,7 @@ class TherapySessionController {
                         therapistId: "$_therapistId",
                         therapistName: "$_therapistName",
                         patientInfo: '$_patientInfo',
+
                         sessionType: "$_sessionType",
                         sessionStartTime: "$_sessionStartTime",
                         sessionEndTime: "$_sessionEndTime",  
@@ -44,6 +45,7 @@ class TherapySessionController {
                         therapistId: "$_therapistId",
                         therapistName: "$_therapistName",
                         patientInfo: '$_patientInfo',
+
                         sessionType: "$_sessionType",
                         sessionStartTime: "$_sessionStartTime",
                         sessionEndTime: "$_sessionEndTime",  
@@ -79,6 +81,7 @@ class TherapySessionController {
                         therapistId: "$_therapistId",
                         therapistName: "$_therapistName",
                         patientInfo: '$_patientInfo',
+
                         sessionType: "$_sessionType",
                         sessionStartTime: "$_sessionStartTime",
                         sessionEndTime: "$_sessionEndTime",  
@@ -97,6 +100,7 @@ class TherapySessionController {
                         therapistId: "$_therapistId",
                         therapistName: "$_therapistName",
                         patientInfo: '$_patientInfo',
+
                         sessionType: "$_sessionType",
                         sessionStartTime: "$_sessionStartTime",
                         sessionEndTime: "$_sessionEndTime",  
@@ -126,8 +130,7 @@ class TherapySessionController {
                     sessionId: "$_sessionId",
                     therapistId: "$_therapistId",
                     therapistName: "$_therapistName",
-                    patientId: "$_patientId",
-                    patientName: "$_patientName",
+                    patientInfo: '$_patientInfo',
                     sessionType: "$_sessionType",
                     sessionStartTime: "$_sessionStartTime",
                     sessionEndTime: "$_sessionEndTime",  
@@ -149,14 +152,11 @@ class TherapySessionController {
         try{
             const therapySessionData = req.body;
 
-            const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
             const therapySessionsCollection = await this.db.getDB().collection('therapysessions');
 
             //check if all required fields are there
 
-
-            const patient = await patientCollection.findOne({_patientId : therapySessionData.patientId});
     
             const therapist = await therapistCollection.findOne({_therapistId: therapySessionData.therapistId});
 
@@ -164,10 +164,9 @@ class TherapySessionController {
             const therapySession = new TherapySession();
 
             therapySession.sessionId = uuidv4();
-            therapySession.patientId = therapySessionData.patientId;
+            therapySession.patientInfo = therapySessionData.patientInfo;
             therapySession.therapistId = therapySessionData.therapistId;
             therapySession.therapistName = therapist._name;
-            therapySession.patientName = patient._name;
             therapySession.sessionType = 'video-chat';
             therapySession.sessionStartTime = therapySessionData.sessionStartTime;
 
@@ -185,12 +184,9 @@ class TherapySessionController {
         try{
             const therapySessionData = req.body;
 
-            const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
             const therapySessionsCollection = await this.db.getDB().collection('therapysessions');
 
-
-            const patient = await patientCollection.findOne({_patientId : therapySessionData.patientId});
     
             const therapist = await therapistCollection.findOne({_therapistId: therapySessionData.therapistId});
 

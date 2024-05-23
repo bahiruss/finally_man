@@ -1,13 +1,15 @@
 class Booking {
-    constructor(bookingId, patientInfo, therapistId, therapistName, date, timeSlot, sessionType, sessionMode) {
+    constructor(bookingId, patientInfo, therapistId, therapistName, date, timeSlot, sessionType, sessionMode, sessionTitle, sessionLocation) {
         this._bookingId = bookingId;
         this._patientInfo = patientInfo;
         this._therapistName = therapistName
         this._therapistId = therapistId;
+        this._sessionTitle = sessionTitle;
         this._date = date;
         this._timeSlot = timeSlot;
         this._sessionType = sessionType;
         this._sessionMode = sessionMode;
+        this._sessionLocation = sessionLocation;
         this._isCanceled = false; 
         this._canceledBy = '';
     }
@@ -40,7 +42,15 @@ class Booking {
     }
 
     set therapistName(therapistName) {
-    this._therapistName = therapistName;
+        this._therapistName = therapistName;
+    }
+
+    get sessionTitle() {
+        return this._sessionTitle;
+    }
+
+    set sessionTitle(sessionTitle) {
+        this._sessionTitle = sessionTitle;
     }
 
     get date() {
@@ -73,6 +83,14 @@ class Booking {
 
     set sessionMode(sessionMode) {
         this._sessionMode = sessionMode;
+    }
+
+    get sessionLocation() {
+        return this._sessionLocation;
+    }
+
+    set sessionLocation(sessionLocation) {
+        this._sessionLocation = sessionLocation;
     }
 
 

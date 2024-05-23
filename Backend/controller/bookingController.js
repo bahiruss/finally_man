@@ -30,13 +30,14 @@ class BookingController {
                         patientInfo: '$_patientInfo',
                         therapistId: '$_therapistId',
                         therapistName: '$_therapistName',
+                        sessionTitle: '$_sessionTitle',
                         date: '$_date',
                         timeSlot: '$_timeSlot',
                         sessionType: '$_sessionType',
                         sessionMode: '$_sessionMode',
+                        sessionLocation: '$_sessionLocation',
                         isCanceled: '$_isCanceled',
                         canceledBy: '$_canceledBy',
-    
                     }
                 }).toArray()
                 
@@ -54,10 +55,12 @@ class BookingController {
                         patientInfo: '$_patientInfo',
                         therapistId: '$_therapistId',
                         therapistName: '$_therapistName',
+                        sessionTitle: '$_sessionTitle',
                         date: '$_date',
                         timeSlot: '$_timeSlot',
                         sessionType: '$_sessionType',
                         sessionMode: '$_sessionMode',
+                        sessionLocation: '$_sessionLocation',
                         isCanceled: '$_isCanceled',
                         canceledBy: '$_canceledBy',
     
@@ -98,10 +101,12 @@ class BookingController {
                         patientInfo: '$_patientInfo',
                         therapistId: '$_therapistId',
                         therapistName: '$_therapistName',
+                        sessionTitle: '$_sessionTitle',
                         date: '$_date',
                         timeSlot: '$_timeSlot',
                         sessionType: '$_sessionType',
                         sessionMode: '$_sessionMode',
+                        sessionLocation: '$_sessionLocation',
                         isCanceled: '$_isCanceled',
                         canceledBy: '$_canceledBy',
     
@@ -121,10 +126,12 @@ class BookingController {
                         patientInfo: '$_patientInfo',
                         therapistId: '$_therapistId',
                         therapistName: '$_therapistName',
+                        sessionTitle: '$_sessionTitle',
                         date: '$_date',
                         timeSlot: '$_timeSlot',
                         sessionType: '$_sessionType',
                         sessionMode: '$_sessionMode',
+                        sessionLocation: '$_sessionLocation',
                         isCanceled: '$_isCanceled',
                         canceledBy: '$_canceledBy',
     
@@ -153,10 +160,12 @@ class BookingController {
                         patientInfo: '$_patientInfo',
                         therapistId: '$_therapistId',
                         therapistName: '$_therapistName',
+                        sessionTitle: '$_sessionTitle',
                         date: '$_date',
                         timeSlot: '$_timeSlot',
                         sessionType: '$_sessionType',
                         sessionMode: '$_sessionMode',
+                        sessionLocation: '$_sessionLocation',
                         isCanceled: '$_isCanceled',
                         canceledBy: '$_canceledBy',
     
@@ -280,6 +289,15 @@ class BookingController {
             booking.timeSlot = bookingData.timeSlot;
             booking.sessionType = bookingData.sessionType;
             booking.sessionMode = sessionMode;
+            booking.sessionLocation = bookingData.sessionLocation;
+
+              // Set sessionTitle for group sessions
+            if (sessionMode === 'group') {
+            if (!bookingData.sessionTitle) {
+                return res.status(400).json({ message: 'sessionTitle is required for group sessions' });
+            }
+            booking.sessionTitle = bookingData.sessionTitle;
+        }
     
             await bookingCollection.insertOne(booking);
     

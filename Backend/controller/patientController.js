@@ -17,7 +17,7 @@ class PatientController {
             //find and also do projection
             const patients = await patientCollection.find({},  {
                 projection: {
-                    _id: 0, // Exclude _id field
+                    _id: 0, 
                     userId: "$_userId", 
                     username: "$_username",
                     password: "$_password",  
@@ -46,10 +46,10 @@ class PatientController {
             const patientCollection = await this.db.getDB().collection('patients');
             const patient = await patientCollection.findOne({ _patientId: req.params.id },
                 {projection: {
-                    _id: 0, // Exclude _id field
-                    userId: "$_userId", // Rename _userId to userId
+                    _id: 0, 
+                    userId: "$_userId", 
                     username: "$_username",
-                    password: "$_password", // **Keep hashed password for security reasons**
+                    password: "$_password",
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",

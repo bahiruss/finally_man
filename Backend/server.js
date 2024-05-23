@@ -21,6 +21,7 @@ const customerAndCrisisSupportRouter = require('./routes/customerAndCrisisSuppor
 const bookingRouter = require('./routes/bookingRoute');
 const therapySessionRouter = require('./routes/therapySessionRoute');
 const scheduleRouter = require('./routes/scheduleRoute');
+const groupSessionRouter = require('./routes/groupSessionRoute');
 // const mongoose = require('mongoose');
 // const connectDB = require('./config/dbConn');
 const PORT = process.env.PORT || 3500;
@@ -63,6 +64,7 @@ app.use('/administrators', administratorRouter(db));
 app.use('/customerAndCrisisSupport', customerAndCrisisSupportRouter(db));
 app.use('/bookings', bookingRouter(db));
 app.use('/sessions', therapySessionRouter(db));
+app.use('/groupSessions', groupSessionRouter(db));
 
 
 

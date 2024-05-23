@@ -4,7 +4,7 @@ class TherapySession {
         this._sessionId = sessionId;
         this._therapistId = therapistId;
         this._patientInfo = patientInfo;
-        this._therapistName = therapistName
+        this._therapistName = therapistName;
         this._sessionType = sessionType;
         this._sessionStartTime = sessionStartTime;
         this._sessionEndTime = sessionEndTime
@@ -41,6 +41,7 @@ class TherapySession {
     set patientInfo(patientInfo) {
     this._patientInfo = patientInfo;
     }
+
     get sessionType() {
         return this._sessionType;
     }

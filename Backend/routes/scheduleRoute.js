@@ -13,6 +13,7 @@ const scheduleRouter = (db) => {
     router.route('/:id')
         .get(scheduleController.getScheduleByTherapistId)
         .put(scheduleController.updateSchedule)
+        .delete(scheduleController.deleteSchedule)
 
 
     return router;

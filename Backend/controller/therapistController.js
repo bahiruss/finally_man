@@ -66,6 +66,7 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
+                    description: "$_description"
                   },
         });
         
@@ -234,7 +235,7 @@ class TherapistController {
             const administratorCollection = await this.db.getDB().collection('administrators');
 
             //checking if the therapist has entered all the data
-            if (!therapistData.username || !therapistData.password || !therapistData.email || !therapistData.name || !therapistData.dateOfBirth || !therapistData.phoneNumber || !therapistData.address || !therapistData.specialization || !therapistData.experience || !therapistData.education) {
+            if (!therapistData.username || !therapistData.password || !therapistData.email || !therapistData.name || !therapistData.dateOfBirth || !therapistData.phoneNumber || !therapistData.address || !therapistData.specialization || !therapistData.experience || !therapistData.education || !therapistData.description) {
                 return res.status(400).json({ 'message': 'Missing required fields' });
             }
 
@@ -270,6 +271,7 @@ class TherapistController {
             therapist.specialization = therapistData.specialization;
             therapist.experience = therapistData.experience;
             therapist.education = therapistData.education;
+            therapist.description = therapistData.description;
 
             if (req.file) {
                 const profilePic = {
@@ -341,6 +343,7 @@ class TherapistController {
                 _specialization: therapistData.specialization || existingTherapist.specialization,
                 _experience: therapistData.experience || existingTherapist.experience,
                 _education: therapistData.education || existingTherapist.education,
+                _description: therapistData.description || existingTherapist.description
             };
             
 
