@@ -57,7 +57,7 @@ class MessageController {
             await messageCollection.insertOne(message);
             res.status(201).json({ message: 'message created successfully', 'createdMessage': message });
         } catch (error) {
-            res.status(500).json({ message: 'Failed to create message'})
+            res.status(500).json({ message: 'Failed to create message'});
         }
     }
 
@@ -100,6 +100,12 @@ class MessageController {
 
             const messageCollection = await this.db.getDB().collection('messages');
 
+            const existingMessage = await messageCollection.findOne({ _messageId: req.params.id });
+
+            if (!existingMessage) {
+                return res.status(404).json({ message: 'Message not found' });
+            }
+        
             await messageCollection.deleteOne({ _messageId: req.params.id });
 
         } catch (error) {
@@ -109,7 +115,7 @@ class MessageController {
 
     getMessageById = async (req, res) => {
         try{
-             
+
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
