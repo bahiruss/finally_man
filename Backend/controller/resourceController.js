@@ -114,11 +114,16 @@ class ResourceController {
             const resourceData = req.body;
 
             const resourceCollection = await this.db.getDB().collection('resources');
+            const therapistCollection = await this.db.getDB().collection('therapists');
 
             //check for missing fields
             if(!resourceData.resourceTitle || !resourceData.resourceDescription || !resourceData.resourceCreatorId || !resourceData.resourceAuthor || !resourceData.resourceContent) {
                 return res.status(400).json({ message: 'Missing required fields! '});
             }
+
+            const therapist = await therapistCollectionfindOne({ _therapistId: resourceData.resourceAuthor}) 
+
+            if(!therapist) return res.status(400).json({ message: 'User is not a therapist'})
 
             const resource = new Resource();
             resource.resourceId = uuidv4()
