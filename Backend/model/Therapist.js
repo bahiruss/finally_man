@@ -66,6 +66,7 @@ class Therapist extends User {
         this._description = description;
     }
 
+
     get approved() {
         return this._approved;
     }

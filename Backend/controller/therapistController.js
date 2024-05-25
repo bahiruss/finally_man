@@ -13,9 +13,9 @@ class TherapistController {
     getAllTherapists = async (req, res) => {
         try {
             const therapistCollection = await this.db.getDB().collection('therapists');
-
-            //find and also do projection
-            const therapists = await therapistCollection.find({_approved: true},  {
+    
+            // Find and also do projection
+            const therapists = await therapistCollection.find({_approved: true}, {
                 projection: {
                     _id: 0, 
                     userId: "$_userId", 
@@ -34,26 +34,40 @@ class TherapistController {
                     experience: "$_experience",
                     education: "$_education",
                 },
-              }).toArray();
-            if (!therapists.length) return res.status(204).json({ 'message': 'No therapists found' });
-            res.json(therapists);
-            } catch (error) {
-            res.status(500).json({ 'message': 'Failed to fetch therapists' });
-            }
-      } 
+            }).toArray();
     
-      getTherapistById = async (req, res) => {
+            const therapistsPlusRating = [];
+    
+            for (const therapist of therapists) {
+                const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+                const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                therapistsPlusRating.push({
+                    ...therapist,
+                    rating: averageRating,
+                });
+            }
+    
+            if (!therapistsPlusRating.length) return res.status(204).json({ 'message': 'No therapists found' });
+            res.json(therapistsPlusRating);
+        } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch therapists' });
+        }
+    };
+    
+    getTherapistById = async (req, res) => {
         try {
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _therapistId: req.params.id, _approved: true },
-                {projection: {
-                    _id: 0, 
-                    userId: "$_userId", 
+            const therapist = await therapistCollection.findOne({ _therapistId: req.params.id, _approved: true }, {
+                projection: {
+                    _id: 0,
+                    userId: "$_userId",
                     username: "$_username",
-                    password: "$_password", 
+                    password: "$_password",
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -67,32 +81,36 @@ class TherapistController {
                     experience: "$_experience",
                     education: "$_education",
                     description: "$_description"
-                  },
-        });
-        
+                },
+            });
+    
             if (!therapist) {
                 return res.status(404).json({ 'message': 'Therapist not found or not approved' });
             }
-        
-            res.json(therapist);
+    
+            const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+            const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+            const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+            const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+    
+            res.json({ ...therapist, rating: averageRating });
         } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
         }
-    }
+    };
     
-
     getTherapistByName = async (req, res) => {
         try {
             if (!req?.body) {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.find({ _name: { $regex: new RegExp(req.body.name, 'i') }, _approved: true },
-                {projection: {
-                    _id: 0, 
-                    userId: "$_userId", 
+            const therapists = await therapistCollection.find({ _name: { $regex: new RegExp(req.body.name, 'i') }, _approved: true }, {
+                projection: {
+                    _id: 0,
+                    userId: "$_userId",
                     username: "$_username",
-                    password: "$_password", // 
+                    password: "$_password",
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -104,31 +122,44 @@ class TherapistController {
                     address: "$_address",
                     specialization: "$_specialization",
                     experience: "$_experience",
-                  },
-        });
-        
-            if (!therapist) {
+                },
+            }).toArray();
+    
+            if (!therapists.length) {
                 return res.status(404).json({ 'message': 'Therapist not found' });
             }
-        
-            res.json(therapist);
-            } catch (error) {
-            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+    
+            const therapistsPlusRating = [];
+            const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+    
+            for (const therapist of therapists) {
+                const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                therapistsPlusRating.push({
+                    ...therapist,
+                    rating: averageRating,
+                });
             }
-    }
-
+    
+            res.json(therapistsPlusRating);
+        } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+        }
+    };
+    
     getTherapistByAddress = async (req, res) => {
         try {
             if (!req?.body) {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.find({ _address: new RegExp(req.query.address, 'i'), _approved: true },
-                {projection: {
-                    _id: 0, 
-                    userId: "$_userId", 
+            const therapists = await therapistCollection.find({ _address: new RegExp(req.query.address, 'i'), _approved: true }, {
+                projection: {
+                    _id: 0,
+                    userId: "$_userId",
                     username: "$_username",
-                    password: "$_password", 
+                    password: "$_password",
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -141,30 +172,44 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                  },
-        });
-        
-            if (!therapist) {
+                },
+            }).toArray();
+    
+            if (!therapists.length) {
                 return res.status(404).json({ 'message': 'Therapist not found' });
             }
-        
-            res.json(therapist);
-            } catch (error) {
-            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+    
+            const therapistsPlusRating = [];
+            const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+    
+            for (const therapist of therapists) {
+                const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                therapistsPlusRating.push({
+                    ...therapist,
+                    rating: averageRating,
+                });
             }
-    }
+    
+            res.json(therapistsPlusRating);
+        } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+        }
+    };
+    
     getTherapistByExperience = async (req, res) => {
         try {
             if (!req?.body) {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.find({ _experience: req.body.experience, _approved: true },
-                {projection: {
-                    _id: 0, 
+            const therapists = await therapistCollection.find({ _experience: req.body.experience, _approved: true }, {
+                projection: {
+                    _id: 0,
                     userId: "$_userId",
                     username: "$_username",
-                    password: "$_password", 
+                    password: "$_password",
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -177,30 +222,44 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                  },
-        });
-        
-            if (!therapist) {
+                },
+            }).toArray();
+    
+            if (!therapists.length) {
                 return res.status(404).json({ 'message': 'Therapist not found' });
             }
-        
-            res.json(therapist);
-            } catch (error) {
-            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+    
+            const therapistsPlusRating = [];
+            const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+    
+            for (const therapist of therapists) {
+                const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                therapistsPlusRating.push({
+                    ...therapist,
+                    rating: averageRating,
+                });
             }
-    }
+    
+            res.json(therapistsPlusRating);
+        } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+        }
+    };
+    
     getTherapistBySpecialization = async (req, res) => {
         try {
             if (!req?.body) {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.find({ _specialization: req.body.specialization, _approved: true },
-                {projection: {
-                    _id: 0, 
-                    userId: "$_userId", 
+            const therapists = await therapistCollection.find({ _specialization: req.body.specialization, _approved: true }, {
+                projection: {
+                    _id: 0,
+                    userId: "$_userId",
                     username: "$_username",
-                    password: "$_password",  
+                    password: "$_password",
                     email: "$_email",
                     name: "$_name",
                     dateOfBirth: "$_dateOfBirth",
@@ -213,18 +272,32 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                  },
-        });
-        
-            if (!therapist) {
+                },
+            }).toArray();
+    
+            if (!therapists.length) {
                 return res.status(404).json({ 'message': 'Therapist not found' });
             }
-        
-            res.json(therapist);
-            } catch (error) {
-            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+    
+            const therapistsPlusRating = [];
+            const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+    
+            for (const therapist of therapists) {
+                const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                therapistsPlusRating.push({
+                    ...therapist,
+                    rating: averageRating,
+                });
             }
-    }
+    
+            res.json(therapistsPlusRating);
+        } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+        }
+    };
+    
         
     createTherapist = async (req, res) => {
         try {
