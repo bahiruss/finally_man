@@ -35,32 +35,40 @@ class ScheduleController {
         try {
             const scheduleData = req.body;
             const scheduleCollection = await this.db.getDB().collection('schedules');
-
+    
+            // Check if the therapist is approved before allowing them to create a schedule
+            const therapistCollection = await this.db.getDB().collection('therapists');
+            const therapist = await therapistCollection.findOne({ _therapistId: scheduleData.therapistId });
+    
+            if (!therapist || !therapist.approved) {
+                return res.status(401).json({ 'message': 'Therapist is not approved to create a schedule' });
+            }
+    
             //checking if the therapist has entered all the data
             if (!scheduleData.therapistId || !scheduleData.oneOnOneAvailability || !scheduleData.groupAvailability) {
                 return res.status(400).json({ 'message': 'Missing required fields' });
             }
-
+    
             // Check for conflicts between one-on-one and group availability
             if (this.hasScheduleConflict(scheduleData.oneOnOneAvailability, scheduleData.groupAvailability)) {
-            return res.status(400).json({ 'message': 'Schedule conflicts between one-on-one and group availability' });
-        }
-
+                return res.status(400).json({ 'message': 'Schedule conflicts between one-on-one and group availability' });
+            }
+    
             const schedule = new Schedule();
             schedule.scheduleId = uuidv4();
             schedule.therapistId = scheduleData.therapistId;
             schedule.oneOnOneAvailability = scheduleData.oneOnOneAvailability;
             schedule.groupAvailability = scheduleData.groupAvailability;
-
+    
             await scheduleCollection.insertOne(schedule);
-
+    
             res.status(201).json({ 'message': 'Schedule created successfully' });
         } catch (error) {
             console.error('Error creating schedule:', error);
             res.status(500).json({ 'message': 'Failed to create schedule' });
         }
     }
-
+    
     updateSchedule = async (req, res) => {
         try {
             if (!req?.params?.id) {

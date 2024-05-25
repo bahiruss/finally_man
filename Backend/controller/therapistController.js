@@ -48,7 +48,7 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapist = await therapistCollection.findOne({ _therapistId: req.params.id},
+            const therapist = await therapistCollection.findOne({ _therapistId: req.params.id, _approved: true },
                 {projection: {
                     _id: 0, 
                     userId: "$_userId", 
@@ -71,14 +71,15 @@ class TherapistController {
         });
         
             if (!therapist) {
-                return res.status(404).json({ 'message': 'Therapist not found' });
+                return res.status(404).json({ 'message': 'Therapist not found or not approved' });
             }
         
             res.json(therapist);
-            } catch (error) {
+        } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
-            }
-      }
+        }
+    }
+    
 
     getTherapistByName = async (req, res) => {
         try {

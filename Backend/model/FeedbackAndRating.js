@@ -1,7 +1,8 @@
 class FeedbackAndRating {
-    constructor(feedbackId, raterId, therapistId, rating, comment, timeStamp) {
+    constructor(feedbackId, raterId, raterName, therapistId, rating, comment, timeStamp) {
         this._feedbackId = feedbackId;
         this._raterId = raterId;
+        this._raterName = raterName
         this._therapistId = therapistId;
         this._rating = rating;
         this._comment = comment;
@@ -14,6 +15,10 @@ class FeedbackAndRating {
 
     get raterId() {
         return this._raterId;
+    }
+
+    get raterName() {
+        return this._raterName;
     }
 
     get therapistId() {
@@ -38,6 +43,10 @@ class FeedbackAndRating {
 
     set raterId(raterId) {
         this._raterId = raterId;
+    }
+
+    set raterName(raterName) {
+        this._raterName = raterName;
     }
 
     set therapistId(therapistId) {

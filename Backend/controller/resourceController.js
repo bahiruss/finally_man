@@ -42,6 +42,9 @@ class ResourceController {
 
     getResourceById = async (req, res) => {
         try{
+            if (!req?.params?.id) {
+                return res.status(400).json({ 'message': 'ID parameter is required' });
+            }
             const resourceCollection = await this.db.getDB().collection('resources');
 
             const resource = await resourceCollection.findOne({ _resourceId: req.params.id }, {
