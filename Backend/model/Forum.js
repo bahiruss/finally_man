@@ -1,8 +1,9 @@
 class Forum {
-    constructor(forumId, forumTitle, forumDescription, forumCreatorId, forumTimeStamp, forumTotalPosts, likes) {
+    constructor(forumId, forumTitle, forumDescription, forumCategory, forumCreatorId, forumTimeStamp, forumTotalPosts, likes) {
         this._forumId = forumId;
         this._forumTitle = forumTitle;
         this._forumDescription = forumDescription;
+        this._forumCategory = forumCategory;
         this._forumCreatorId = forumCreatorId;
         this._forumTimeStamp = forumTimeStamp;
         this._forumTotalPosts = forumTotalPosts;
@@ -20,6 +21,10 @@ class Forum {
 
     get forumDescription() {
         return this._forumDescription;
+    }
+
+    get forumCategory() {
+        return this._forumCategory;
     }
 
     get forumCreatorId() {
@@ -49,6 +54,10 @@ class Forum {
 
     set forumDescription(value) {
         this._forumDescription = value;
+    }
+
+    set forumCategory(value) {
+        this._forumCategory = value;
     }
 
     set forumCreatorId(value) {
