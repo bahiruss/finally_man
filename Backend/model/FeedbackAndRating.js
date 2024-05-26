@@ -65,3 +65,5 @@ class FeedbackAndRating {
         this._timeStamp = timeStamp;
     }
 }
+
+module.exports = FeedbackAndRating;
