@@ -68,9 +68,9 @@ class MessageController {
             }
             const { messageContent } = req.body;
     
-            if (!messageContent) {
-                return res.status(400).json({ message: 'Message content is required for updating' });
-            }
+            // if (!messageContent) {
+            //     return res.status(400).json({ message: 'Message content is required for updating' });
+            // }
     
             const messageCollection = await this.db.getDB().collection('messages');
     
@@ -107,6 +107,8 @@ class MessageController {
             }
         
             await messageCollection.deleteOne({ _messageId: req.params.id });
+
+            res.json({ message: 'Message deleted successfully' });
 
         } catch (error) {
             res.status(500).json({ message: 'Failed to delete message' });

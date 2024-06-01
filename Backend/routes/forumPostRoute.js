@@ -9,22 +9,22 @@ const forumPostRouter = (db) => {
     router.route('/')
     .post(forumPostController.createForumPost);  
 
-router.route('/:id')
-    .get(forumPostController.getForumPostById)    
-    .put(forumPostController.updateForumPost)     
-    .delete(forumPostController.deleteForumPost); 
+    router.route('/:id')
+        .get(forumPostController.getForumPostById)    
+        .put(forumPostController.updateForumPost)     
+        .delete(forumPostController.deleteForumPost); 
 
-router.route('/:id/like')
-    .post(forumPostController.giveALike);         
+    router.route('/:id/like')
+        .post(forumPostController.giveALike);         
 
-router.route('/:id/comments')
-    .post(forumPostController.makeAComment);      
+    router.route('/:id/comments')
+        .post(forumPostController.makeAComment);      
 
-router.route('/forum/:forumId')
-    .get(forumPostController.getForumPosts);      
+    router.route('/forum/:forumId')
+        .get(forumPostController.getForumPosts);      
 
-router.route('/creator/posts')
-    .post(forumPostController.getForumPostsByCreatorId);
+    router.route('/creator/posts')
+        .post(forumPostController.getForumPostsByCreatorId);
 
     return router
 }
