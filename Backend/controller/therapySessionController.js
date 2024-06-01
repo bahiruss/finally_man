@@ -8,7 +8,7 @@ class TherapySessionController {
 
     getVideoSessions = async (req, res) => {
         try{
-            const userId  = req.params.id;
+            const userId  = req.body.id;
 
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
@@ -63,7 +63,7 @@ class TherapySessionController {
 
     getTextSessions = async (req, res) => {
         try{
-            const userId  = req.params.id;
+            const userId  = req.body.id;
 
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');

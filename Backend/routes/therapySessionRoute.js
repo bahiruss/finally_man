@@ -12,13 +12,13 @@ const therapySessionRouter = (db) => {
     router.route('/text-sessions')
         .post(therapySessionController.createTextSession)
 
-    router.route('/text-sessions/user/:id')
+    router.route('/text-sessions/user')
         .get(therapySessionController.getTextSessions)
 
     router.route('/video-sessions')
         .post(therapySessionController.createVideoSessions)
 
-    router.route('/video-sessions/user/:id')
+    router.route('/video-sessions/user')
         .get(therapySessionController.getVideoSessions)
         
 
