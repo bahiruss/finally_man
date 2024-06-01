@@ -124,15 +124,15 @@ class ResourceController {
                 return res.status(400).json({ message: 'Missing required fields! '});
             }
 
-            const therapist = await therapistCollectionfindOne({ _therapistId: resourceData.resourceAuthor}) 
+            const therapist = await therapistCollection.findOne({ _userId: resourceData.resourceCreatorId}) ;
 
-            if(!therapist) return res.status(400).json({ message: 'User is not a therapist'})
+            if(!therapist) return res.status(400).json({ message: 'User is not a therapist'});
 
             const resource = new Resource();
             resource.resourceId = uuidv4()
             resource.resourceTitle = resourceData.resourceTitle;  
             resource.resourceDescription = resourceData.resourceDescription;
-            resource.resourceCreatorId = resourceData.resourceCreatorId;
+            resource.resourceCreatorId = therapist._therapistId;
             resource.resourceAuthor = resourceData.resourceAuthor;
             resource.resourceContent = resourceData.resourceDescription.length > 60 ? resourceData.resourceDescription.substring(0, 60) + '...' : resourceData.resourceDescription;
             resource.resourceTimeStamp = new Date();
