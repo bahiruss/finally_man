@@ -12,10 +12,10 @@ class CustomerandCrisisSupportController {
     }
     getAllCustomerAndCrisisSupport = async (req, res) => {
         try {
-            const CustomerAndCrisisSuppportCollection = await this.db.getDB().collection('customerandcrisissupports');
+            const customerAndCrisisSupportCollection = await this.db.getDB().collection('customerandcrisissupports');
 
             //find and also do projection
-            const customerAndCrisisSupport = await CustomerAndCrisisSuppportCollection.find({},  {
+            const customerAndCrisisSupport = await customerAndCrisisSupportCollection.find({},  {
                 projection: {
                     _id: 0, 
                     userId: "$_userId", 
@@ -43,8 +43,8 @@ class CustomerandCrisisSupportController {
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
-            const CustomerAndCrisisSuppportCollection = await this.db.getDB().collection('customerandcrisissupports');
-            const customerAndCrisisSupport = await CustomerAndCrisisSuppportCollection.findOne({ _customerSupportId: req.params.id },
+            const customerAndCrisisSupportCollection = await this.db.getDB().collection('customerandcrisissupports');
+            const customerAndCrisisSupport = await customerAndCrisisSupportCollection.findOne({ _customerSupportId: req.params.id },
                 {projection: {
                     _id: 0,
                     userId: "$_userId",
@@ -146,7 +146,7 @@ class CustomerandCrisisSupportController {
             const customerAndCrisisSupportCollection = await this.db.getDB().collection('customerandcrisissupports');
             const administratorCollection = await this.db.getDB().collection('administrators');
 
-            const existingCustomerAndCrisisSupport = await CustomerAndCrisisSuppportCollection.findOne({ _customerSupportId: customerSupportId });
+            const existingCustomerAndCrisisSupport = await customerAndCrisisSupportCollection.findOne({ _customerSupportId: customerSupportId });
         
             if (!existingCustomerAndCrisisSupport) {
                 return res.status(404).json({ 'message': 'CustomerAndCrisisSupport not found' });
@@ -198,7 +198,7 @@ class CustomerandCrisisSupportController {
             }
 
 
-            const result = await CustomerAndCrisisSuppportCollection.updateOne(
+            const result = await customerAndCrisisSupportCollection.updateOne(
                 { _customerSupportId: customerSupportId },
                 { $set: updatedCustomerAndCrisisSupportData }
             );
@@ -221,13 +221,13 @@ class CustomerandCrisisSupportController {
             }
       
             const customerSupportId = req.params.id;
-            const CustomerAndCrisisSuppportCollection = await this.db.getDB().collection('customerandcrisissupports');
-            const customerAndCrisisSupport = await CustomerAndCrisisSuppportCollection.findOne({ _customerSupportId: customerSupportId });
+            const customerAndCrisisSupportCollection = await this.db.getDB().collection('customerandcrisissupports');
+            const customerAndCrisisSupport = await customerAndCrisisSupportCollection.findOne({ _customerSupportId: customerSupportId });
 
             if(!customerAndCrisisSupport) {
                 return res.status(204).json({ "message": `No customerAndCrisisSupport matches ID ${req.body.id}.` })
             }
-            const deletedCustomerAndCrisisSupport = await CustomerAndCrisisSuppportCollection.deleteOne({ _customerSupportId: customerSupportId });
+            const deletedCustomerAndCrisisSupport = await customerAndCrisisSupportCollection.deleteOne({ _customerSupportId: customerSupportId });
             res.json( { "message": 'CustomerAndCrisisSupport successfully deleted ' });
             } catch (error) {
                 res.status(500).json({ 'message': 'Failed to delete customerAndCrisisSupport' });
