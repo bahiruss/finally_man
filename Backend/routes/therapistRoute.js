@@ -3,7 +3,12 @@ const router = express.Router();
 const multer = require('multer');
 const TherapistController= require('../controller/therapistController');
 const ROLES_LIST = require('../config/roles_list');
-const upload = multer();
+const upload = multer().fields([
+    { name: 'profilePic', maxCount: 1 },
+    { name: 'educationCertificate', maxCount: 1 },
+    { name: 'license', maxCount: 1 }
+  ]);
+
 
 const therapistRouter = (db) => {
     const therapistController = new TherapistController(db);
@@ -32,7 +37,7 @@ const therapistRouter = (db) => {
     
     router.route('/:id')
     .get(therapistController.getTherapistById)
-    .put(upload.single('profilePic'), therapistController.updateTherapist)
+    .put(upload, therapistController.updateTherapist)
     .delete(therapistController.deleteTherapist)
     
 

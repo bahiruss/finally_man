@@ -309,7 +309,7 @@ class TherapistController {
             const administratorCollection = await this.db.getDB().collection('administrators');
 
             //checking if the therapist has entered all the data
-            if (!therapistData.username || !therapistData.password || !therapistData.email || !therapistData.name || !therapistData.dateOfBirth || !therapistData.phoneNumber || !therapistData.address || !therapistData.specialization || !therapistData.experience || !therapistData.education || !therapistData.description) {
+            if (!therapistData.username || !therapistData.password || !therapistData.email || !therapistData.name || !therapistData.dateOfBirth || !therapistData.phoneNumber || !therapistData.address || !therapistData.specialization || !therapistData.experience || !therapistData.education || !therapistData.description || !req.files['profilePic'] || !req.files['educationCertificate'] || !req.files['license']) {
                 return res.status(400).json({ 'message': 'Missing required fields' });
             }
 
@@ -353,6 +353,19 @@ class TherapistController {
                     contentType: req.file.mimetype // Capture the content type
                 };
                 therapist.profilePic = profilePic;
+
+                therapist.educationCertificate = {
+                    data: req.files['educationCertificate'][0].buffer,
+                    contentType: req.files['educationCertificate'][0].mimetype
+                };
+                therapist.license = {
+                    data: req.files['license'][0].buffer,
+                    contentType: req.files['license'][0].mimetype
+                };
+            }
+
+            if (!req.files.educationCertificate || !req.files.license) {
+                return res.status(400).json({ 'message': 'Education certificate and license are required' });
             }
         
             await therapistCollection.insertOne(therapist);

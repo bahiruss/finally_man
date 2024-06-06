@@ -1,7 +1,7 @@
 const User = require('./User');
 
 class Therapist extends User {
-    constructor(therapistId, address, specialization, experience, education, description){
+    constructor(therapistId, address, specialization, experience, education, description, educationCertificate, license){
         super();
         this._therapistId = therapistId;
         this._role = 'Therapist'
@@ -11,6 +11,8 @@ class Therapist extends User {
         this._education = education;
         this._description = description;
         this._approved = false;
+        this._educationCertificate = educationCertificate; 
+        this._license = license;
 
     }
 
@@ -73,6 +75,22 @@ class Therapist extends User {
 
     set approved(approved) {
         this._approved = approved;
+    }
+
+    get educationCertificate() {
+        return this._educationCertificate;
+    }
+
+    set educationCertificate(educationCertificate) {
+        this._educationCertificate = educationCertificate;
+    }
+
+    get license() {
+        return this._license;
+    }
+
+    set license(license) {
+        this._license = license;
     }
     
 }
