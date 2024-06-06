@@ -37,7 +37,7 @@ const therapistRouter = (db) => {
     
     router.route('/:id')
     .get(therapistController.getTherapistById)
-    .put(upload.single('profilePic'), therapistController.updateTherapist)
+    .put(upload, therapistController.updateTherapist)
     .delete(therapistController.deleteTherapist)
     
 

@@ -347,22 +347,19 @@ class TherapistController {
             therapist.education = therapistData.education;
             therapist.description = therapistData.description;
 
-            if (req.file) {
-                const profilePic = {
-                    data: req.file.buffer, // Store the image buffer directly
-                    contentType: req.file.mimetype // Capture the content type
-                };
-                therapist.profilePic = profilePic;
+            therapist.profilePic = {
+                data: req.files['profilePic'][0].buffer,
+                contentType: req.files['profilePic'][0].mimetype
+            };
 
-                therapist.educationCertificate = {
-                    data: req.files['educationCertificate'][0].buffer,
-                    contentType: req.files['educationCertificate'][0].mimetype
-                };
-                therapist.license = {
-                    data: req.files['license'][0].buffer,
-                    contentType: req.files['license'][0].mimetype
-                };
-            }
+            therapist.educationCertificate = {
+                data: req.files['educationCertificate'][0].buffer,
+                contentType: req.files['educationCertificate'][0].mimetype
+            };
+            therapist.license = {
+                data: req.files['license'][0].buffer,
+                contentType: req.files['license'][0].mimetype
+            };
 
         
             await therapistCollection.insertOne(therapist);
@@ -432,10 +429,10 @@ class TherapistController {
             
 
             //first check if the profile pic has been changed
-            if (req.file) {
+            if (req.files && req.files['profilePic']) {
                 const profilePic = {
-                    data: req.file.buffer, // Store the image buffer directly
-                    contentType: req.file.mimetype // Capture the content type
+                    data: req.files['profilePic'][0].buffer, // Store the image buffer directly
+                    contentType: req.files['profilePic'][0].mimetype // Capture the content type
                 };
                 updatedTherapistData._profilePic = profilePic;
             }
