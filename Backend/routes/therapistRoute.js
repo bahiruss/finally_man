@@ -15,7 +15,7 @@ const therapistRouter = (db) => {
 
     router.route('/')
         .get(therapistController.getAllTherapists)
-        .post(upload.single('profilePic'), therapistController.createTherapist);
+        .post(upload, therapistController.createTherapist);
 
     router.route('/name')
         .get(therapistController.getTherapistByName);
@@ -37,7 +37,7 @@ const therapistRouter = (db) => {
     
     router.route('/:id')
     .get(therapistController.getTherapistById)
-    .put(upload, therapistController.updateTherapist)
+    .put(upload.single('profilePic'), therapistController.updateTherapist)
     .delete(therapistController.deleteTherapist)
     
 
