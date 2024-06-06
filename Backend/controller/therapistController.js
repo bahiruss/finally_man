@@ -390,7 +390,7 @@ class TherapistController {
                 const duplicateTherapistUsername = await therapistCollection.findOne({ _username: therapistData.username});
                 const duplicateCustandCriUsername = await customerAndCrisisSupportCollection.findOne({ _username: therapistData.username});
                 const duplicateAdministratorUsername = await administratorCollection.findOne({ _username: therapistData.username});
-                if(duplicatePatientUsername || duplicateTherapistUsername || duplicateCustandCriUsername || duplicateAdministratorUsername) return res.status(409).json({'message' : 'A user with the same username already exists'});
+                if(duplicatePatientUsername || (duplicateTherapistUsername && duplicateTherapistUsername._therapistId !== therapistId)  || duplicateCustandCriUsername || duplicateAdministratorUsername) return res.status(409).json({'message' : 'A user with the same username already exists'});
     
             }
     
@@ -400,7 +400,7 @@ class TherapistController {
             const duplicateTherapistEmail = await therapistCollection.findOne({ _email: therapistData.email});
             const duplicateCustandCriEmail = await customerAndCrisisSupportCollection.findOne({ _email: therapistData.email});
             const duplicateAdministratorEmail = await administratorCollection.findOne({ _email: therapistData.email});
-            if(duplicatePatientEmail || duplicateTherapistEmail || duplicateCustandCriEmail || duplicateAdministratorEmail) return res.status(409).json({'message' : 'A user with the same email already exists'});
+            if(duplicatePatientEmail || (duplicateTherapistEmail && duplicateTherapistEmail._therapistId !== therapistId) || duplicateCustandCriEmail || duplicateAdministratorEmail) return res.status(409).json({'message' : 'A user with the same email already exists'});
 
             }
             

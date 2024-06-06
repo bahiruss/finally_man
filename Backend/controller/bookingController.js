@@ -1,6 +1,7 @@
 const Booking = require('../model/Booking');
 const { v4: uuidv4 } = require('uuid');
-
+const schedule = require('node-schedule');
+const NotificationController = require('./notificationController');
 class BookingController {
     constructor (db) {
         this.db = db;
@@ -300,6 +301,25 @@ class BookingController {
         }
     
             await bookingCollection.insertOne(booking);
+
+
+            // To send notification mail
+            // const appointmentDate = new Date(bookingData.date); // Convert the appointment date to a Date object
+            // const reminderDate = new Date(appointmentDate.getTime() - 3600000); // Subtract 1 hour from the appointment time
+            const reminderDate = new Date();
+            reminderDate.setMinutes(reminderDate.getMinutes() + 5);
+            const commonNotifDetails = {
+                date: booking.date, 
+                time: booking.timeSlot, 
+                location: booking.sessionLocation,
+            }
+
+            schedule.scheduleJob(reminderDate, () => {
+                NotificationController.sendNotification(commonNotifDetails, patient._email, patient._name, patient._role) //for patient
+                NotificationController.sendNotification(commonNotifDetails, therapist._email, therapist._name, therapist._role) //for therapist
+            });
+
+
     
             res.status(201).json({ message: 'Booking created successfully' });
         } catch (error) {

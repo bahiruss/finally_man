@@ -141,6 +141,10 @@ class PatientController {
             const patientData = req.body;
         
             const patientCollection = await this.db.getDB().collection('patients');
+            const therapistCollection = await this.db.getDB().collection('therapists');
+            const customerAndCrisisSupportCollection = await this.db.getDB().collection('customerandcrisissupports');
+            const administratorCollection = await this.db.getDB().collection('administrators');
+
             const existingPatient = await patientCollection.findOne({ _patientId: patientId });
         
             if (!existingPatient) {
@@ -153,7 +157,7 @@ class PatientController {
                 const duplicateTherapistUsername = await therapistCollection.findOne({ _username: patientData.username});
                 const duplicateCustandCriUsername = await customerAndCrisisSupportCollection.findOne({ _username: patientData.username});
                 const duplicateAdministratorUsername = await administratorCollection.findOne({ _username: patientData.username});
-                if(duplicatePatientUsername || duplicateTherapistUsername || duplicateCustandCriUsername || duplicateAdministratorUsername) return res.status(409).json({'message' : 'A user with the same username already exists'});
+                if((duplicatePatientUsername && duplicatePatientUsername._patientId !== patientId) || duplicateTherapistUsername || duplicateCustandCriUsername || duplicateAdministratorUsername) return res.status(409).json({'message' : 'A user with the same username already exists'});
     
             }
     
@@ -163,7 +167,7 @@ class PatientController {
             const duplicateTherapistEmail = await therapistCollection.findOne({ _email: patientData.email});
             const duplicateCustandCriEmail = await customerAndCrisisSupportCollection.findOne({ _email: patientData.email});
             const duplicateAdministratorEmail = await administratorCollection.findOne({ _email: patientData.email});
-            if(duplicatePatientEmail || duplicateTherapistEmail || duplicateCustandCriEmail || duplicateAdministratorEmail) return res.status(409).json({'message' : 'A user with the same email already exists'});
+            if((duplicatePatientEmail && duplicatePatientEmail._patientId !== patientId) || duplicateTherapistEmail || duplicateCustandCriEmail || duplicateAdministratorEmail) return res.status(409).json({'message' : 'A user with the same email already exists'});
 
             }
             
@@ -206,7 +210,9 @@ class PatientController {
             res.json({ 'message': 'Patient updated successfully', 'updatedPatient': updatedPatientData });
             } catch (error) {
             res.status(500).json({ 'message': 'Failed to update patient' });
+            console.log(error)
             }
+
       }
 
     deletePatient = async (req, res) => {

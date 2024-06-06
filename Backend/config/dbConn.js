@@ -13,7 +13,7 @@ class Database {
         try {
             await this.client.connect();
             this.db = this.client.db(dbName);
-            console.log('Connected to the database');
+            console.log('Connected to the database' );
         } catch (error) {
             console.error(`Error connecting to the database: ${error}`);
         }

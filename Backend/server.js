@@ -6,7 +6,6 @@ const cors = require('cors');
 const http = require("http");
 const { Server } = require("socket.io") 
 const Database = require('./config/dbConn');
-
 const corsOptions = require('./config/corsOptions');
 // const { logger } = require('./middleware/logEvents');
 // const errorHandler = require('./middleware/errorHandler');
@@ -67,8 +66,6 @@ app.use('/bookings', bookingRouter(db));
 app.use('/sessions', therapySessionRouter(db));
 app.use('/groupSessions', groupSessionRouter(db));
 app.use('/feedbackAndRating', feedbackRouter(db));
-
-
 
 
 
