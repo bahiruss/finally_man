@@ -364,9 +364,6 @@ class TherapistController {
                 };
             }
 
-            if (!req.files.educationCertificate || !req.files.license) {
-                return res.status(400).json({ 'message': 'Education certificate and license are required' });
-            }
         
             await therapistCollection.insertOne(therapist);
 
