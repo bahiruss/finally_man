@@ -7,9 +7,9 @@ const http = require("http");
 const { Server } = require("socket.io") 
 const Database = require('./config/dbConn');
 const corsOptions = require('./config/corsOptions');
-// const { logger } = require('./middleware/logEvents');
+const { logger } = require('./middleware/logEvents');
 // const errorHandler = require('./middleware/errorHandler');
-// const verifyJWT = require('./middleware/verifyJWT');
+const verifyJWT = require('./middleware/verifyJWT');
 const cookieParser = require('cookie-parser');
 const credentials = require('./middleware/credentials');
 
@@ -22,9 +22,12 @@ const therapySessionRouter = require('./routes/therapySessionRoute');
 const scheduleRouter = require('./routes/scheduleRoute');
 const groupSessionRouter = require('./routes/groupSessionRoute');
 const feedbackRouter = require('./routes/feedbackAndRatingRoute');
+const authRouter = require('./routes/authRoute');
 // const mongoose = require('mongoose');
 // const connectDB = require('./config/dbConn');
 const PORT = process.env.PORT || 3500;
+
+// app.use(logger);
 
 app.use(credentials);
 
@@ -59,9 +62,12 @@ const db = new Database();
 
 app.use('/patients', patientRouter(db));
 app.use('/therapists', therapistRouter(db));
-app.use('/schedule', scheduleRouter(db));
 app.use('/administrators', administratorRouter(db));
 app.use('/customerAndCrisisSupport', customerAndCrisisSupportRouter(db));
+app.use('/auth', authRouter(db));
+
+app.use(verifyJWT);
+app.use('/schedule', scheduleRouter(db));
 app.use('/bookings', bookingRouter(db));
 app.use('/sessions', therapySessionRouter(db));
 app.use('/groupSessions', groupSessionRouter(db));

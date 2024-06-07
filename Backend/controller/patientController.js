@@ -152,7 +152,7 @@ class PatientController {
             }
 
             //check for duplicate username but first check if user is updating
-            if (patientData.username && patientData.username !== existingPatient.username) {
+            if (patientData.username && patientData.username !== existingPatient._username) {
                 const duplicatePatientUsername = await patientCollection.findOne({ _username: patientData.username});
                 const duplicateTherapistUsername = await therapistCollection.findOne({ _username: patientData.username});
                 const duplicateCustandCriUsername = await customerAndCrisisSupportCollection.findOne({ _username: patientData.username});
@@ -162,7 +162,7 @@ class PatientController {
             }
     
             // Check for duplicate email but first check if it is being updated
-            if (patientData.email && patientData.email !== existingPatient.email) {
+            if (patientData.email && patientData.email !== existingPatient._email) {
             const duplicatePatientEmail = await patientCollection.findOne({ _email: patientData.email});
             const duplicateTherapistEmail = await therapistCollection.findOne({ _email: patientData.email});
             const duplicateCustandCriEmail = await customerAndCrisisSupportCollection.findOne({ _email: patientData.email});
@@ -173,13 +173,13 @@ class PatientController {
             
             // to make updating optional
             const updatedPatientData = {
-                _username: patientData.username || existingPatient.username,
-                _password: existingPatient.password, // no or cause it is done below
-                _email: patientData.email || existingPatient.email,
-                _name: patientData.name || existingPatient.name,
-                _dateOfBirth: patientData.dateOfBirth || existingPatient.dateOfBirth,
-                _phoneNumber: patientData.phoneNumber || existingPatient.phoneNumber,
-                _profilePic: existingPatient.profilePic
+                _username: patientData.username || existingPatient._username,
+                _password: existingPatient._password, // no or cause it is done below
+                _email: patientData.email || existingPatient._email,
+                _name: patientData.name || existingPatient._name,
+                _dateOfBirth: patientData.dateOfBirth || existingPatient._dateOfBirth,
+                _phoneNumber: patientData.phoneNumber || existingPatient._phoneNumber,
+                _profilePic: existingPatient._profilePic
             };
 
             //first check if the profile pic has been changed

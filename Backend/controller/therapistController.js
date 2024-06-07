@@ -41,11 +41,12 @@ class TherapistController {
             for (const therapist of therapists) {
                 const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
                 const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
-                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
                 const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
                 therapistsPlusRating.push({
                     ...therapist,
-                    rating: averageRating,
+                    rating: roundedRating,
                 });
             }
     
@@ -80,7 +81,8 @@ class TherapistController {
                     specialization: "$_specialization",
                     experience: "$_experience",
                     education: "$_education",
-                    description: "$_description"
+                    description: "$_description",
+                    approved: "$_approved"
                 },
             });
     
@@ -90,10 +92,11 @@ class TherapistController {
     
             const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
             const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
-            const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+            const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
             const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+            const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
     
-            res.json({ ...therapist, rating: averageRating });
+            res.json({ ...therapist, rating: roundedRating });
         } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
         }
@@ -134,17 +137,19 @@ class TherapistController {
     
             for (const therapist of therapists) {
                 const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
-                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
                 const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
                 therapistsPlusRating.push({
                     ...therapist,
-                    rating: averageRating,
+                    rating: roundedRating,
                 });
             }
     
             res.json(therapistsPlusRating);
         } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
+            console.log(error)
         }
     };
     
@@ -154,7 +159,7 @@ class TherapistController {
                 return res.status(400).json({ 'message': 'Bad Request' });
             }
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapists = await therapistCollection.find({ _address: new RegExp(req.query.address, 'i'), _approved: true }, {
+            const therapists = await therapistCollection.find({ _address: new RegExp(req.body.address, 'i'), _approved: true }, {
                 projection: {
                     _id: 0,
                     userId: "$_userId",
@@ -184,11 +189,12 @@ class TherapistController {
     
             for (const therapist of therapists) {
                 const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
-                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
                 const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
                 therapistsPlusRating.push({
                     ...therapist,
-                    rating: averageRating,
+                    rating: roundedRating,
                 });
             }
     
@@ -234,11 +240,12 @@ class TherapistController {
     
             for (const therapist of therapists) {
                 const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
-                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
                 const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
                 therapistsPlusRating.push({
                     ...therapist,
-                    rating: averageRating,
+                    rating: roundedRating,
                 });
             }
     
@@ -284,11 +291,12 @@ class TherapistController {
     
             for (const therapist of therapists) {
                 const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
-                const totalRating = feedbacks.reduce((sum, rating) => sum + rating._rating, 0);
+                const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
                 const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+                const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
                 therapistsPlusRating.push({
                     ...therapist,
-                    rating: averageRating,
+                    rating: roundedRating,
                 });
             }
     
@@ -392,7 +400,7 @@ class TherapistController {
             }
 
             //check for duplicate username but first check if user is updating
-            if (therapistData.username && therapistData.username !== existingTherapist.username) {
+            if (therapistData.username && therapistData.username !== existingTherapist._username) {
                 const duplicatePatientUsername = await patientCollection.findOne({ _username: therapistData.username});
                 const duplicateTherapistUsername = await therapistCollection.findOne({ _username: therapistData.username});
                 const duplicateCustandCriUsername = await customerAndCrisisSupportCollection.findOne({ _username: therapistData.username});
@@ -402,7 +410,7 @@ class TherapistController {
             }
     
             // Check for duplicate email but first check if it is being updated
-            if (therapistData.email && therapistData.email !== existingTherapist.email) {
+            if (therapistData.email && therapistData.email !== existingTherapist._email) {
             const duplicatePatientEmail = await patientCollection.findOne({ _email: therapistData.email});
             const duplicateTherapistEmail = await therapistCollection.findOne({ _email: therapistData.email});
             const duplicateCustandCriEmail = await customerAndCrisisSupportCollection.findOne({ _email: therapistData.email});
@@ -413,18 +421,18 @@ class TherapistController {
             
             // to make updating optional
             const updatedTherapistData = {
-                _username: therapistData.username || existingTherapist.username,
-                _password: existingTherapist.password, // no or cause it is done below
-                _email: therapistData.email || existingTherapist.email,
-                _name: therapistData.name || existingTherapist.name,
-                _dateOfBirth: therapistData.dateOfBirth || existingTherapist.dateOfBirth,
-                _phoneNumber: therapistData.phoneNumber || existingTherapist.phoneNumber,
-                _profilePic: existingTherapist.profilePic,
-                _address: therapistData.address || existingTherapist.address,
-                _specialization: therapistData.specialization || existingTherapist.specialization,
-                _experience: therapistData.experience || existingTherapist.experience,
-                _education: therapistData.education || existingTherapist.education,
-                _description: therapistData.description || existingTherapist.description
+                _username: therapistData.username || existingTherapist._username,
+                _password: existingTherapist._password, // no or cause it is done below
+                _email: therapistData.email || existingTherapist._email,
+                _name: therapistData.name || existingTherapist._name,
+                _dateOfBirth: therapistData.dateOfBirth || existingTherapist._dateOfBirth,
+                _phoneNumber: therapistData.phoneNumber || existingTherapist._phoneNumber,
+                _profilePic: existingTherapist._profilePic,
+                _address: therapistData.address || existingTherapist._address,
+                _specialization: therapistData.specialization || existingTherapist._specialization,
+                _experience: therapistData.experience || existingTherapist._experience,
+                _education: therapistData.education || existingTherapist._education,
+                _description: therapistData.description || existingTherapist._description
             };
             
 
@@ -470,7 +478,7 @@ class TherapistController {
             const therapist = await therapistCollection.findOne({ _therapistId: therapistId });
 
             if(!therapist) {
-                return res.status(204).json({ "message": `No therapist matches ID ${req.body.id}.` })
+                return res.status(404).json({ "message": `No therapist matches ID ${req.body.id}.` })
             }
             await therapistCollection.deleteOne({ _therapistId: therapistId });
             res.json( { "message": 'Therapist successfully deleted ' });

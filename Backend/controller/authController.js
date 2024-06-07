@@ -71,19 +71,19 @@ class AuthController {
             // Check the password and if valid create token
             const match = await bcrypt.compare(loginData.password, foundUser._password);
             if (match) {
-                const roles = Object.values(foundUser._roles);
+                const role = foundUser._role;
                 // Create jwt
                 const accessToken = jwt.sign(
                     {
                         "UserInfo": {
                             "userId": foundUser._userId,
-                            "roles": roles
+                            "role": role
                         }
                     },
                     process.env.ACCESS_TOKEN_SECRET,
                     { expiresIn: '1d'}
                 );
-                res.json({ accessToken });
+                res.json({ accessToken: accessToken, role: role });
             } else {
                 return res.sendStatus(401);
             }

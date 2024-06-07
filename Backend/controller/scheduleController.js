@@ -39,8 +39,11 @@ class ScheduleController {
             // Check if the therapist is approved before allowing them to create a schedule
             const therapistCollection = await this.db.getDB().collection('therapists');
             const therapist = await therapistCollection.findOne({ _therapistId: scheduleData.therapistId });
-    
-            if (!therapist || !therapist.approved) {
+            
+            if (!therapist) {
+                return res.status(401).json({ message: 'Therapist not found'});
+            }
+            if(therapist._approved !== true) {
                 return res.status(401).json({ 'message': 'Therapist is not approved to create a schedule' });
             }
     
@@ -86,15 +89,16 @@ class ScheduleController {
                 return res.status(404).json({ 'message': 'Schedule not found' });
             }
 
-            // Check for conflicts between one-on-one and group availability
-            if (this.hasScheduleConflict(scheduleData.oneOnOneAvailability, scheduleData.groupAvailability)) {
-            return res.status(400).json({ 'message': 'Schedule conflicts between one-on-one and group availability' });
-            }
             
             const updatedScheduleData = {
-                _oneOnOneAvailability: scheduleData.oneOnOneAvailability || existingSchedule.oneOnOneAvailability,
-                _groupAvailability: scheduleData.groupAvailability || existingSchedule.groupAvailability,
+                _oneOnOneAvailability: scheduleData.oneOnOneAvailability || existingSchedule._oneOnOneAvailability,
+                _groupAvailability: scheduleData.groupAvailability || existingSchedule._groupAvailability,
             };
+
+            // Check for conflicts between one-on-one and group availability
+            if (this.hasScheduleConflict(updatedScheduleData._oneOnOneAvailability, updatedScheduleData._groupAvailability)) {
+                return res.status(400).json({ 'message': 'Schedule conflicts between one-on-one and group availability' });
+                }
 
             
             const result = await scheduleCollection.updateOne(

@@ -153,7 +153,7 @@ class CustomerandCrisisSupportController {
             }
 
             //check for duplicate username but first check if user is updating
-            if (customerAndCrisisSupportData.username && customerAndCrisisSupportData.username !== existingPatient.username) {
+            if (customerAndCrisisSupportData.username && customerAndCrisisSupportData.username !== existingCustomerAndCrisisSupport._username) {
                 const duplicatePatientUsername = await patientCollection.findOne({ _username: customerAndCrisisSupportData.username});
                 const duplicateTherapistUsername = await therapistCollection.findOne({ _username: customerAndCrisisSupportData.username});
                 const duplicateCustandCriUsername = await customerAndCrisisSupportCollection.findOne({ _username: customerAndCrisisSupportData.username});
@@ -163,7 +163,7 @@ class CustomerandCrisisSupportController {
             }
     
             // Check for duplicate email but first check if it is being updated
-            if (customerAndCrisisSupportData.email && customerAndCrisisSupportData.email !== existingPatient.email) {
+            if (customerAndCrisisSupportData.email && customerAndCrisisSupportData.email !== existingCustomerAndCrisisSupport._email) {
             const duplicatePatientEmail = await patientCollection.findOne({ _email: customerAndCrisisSupportData.email});
             const duplicateTherapistEmail = await therapistCollection.findOne({ _email: customerAndCrisisSupportData.email});
             const duplicateCustandCriEmail = await customerAndCrisisSupportCollection.findOne({ _email: customerAndCrisisSupportData.email});
@@ -174,13 +174,13 @@ class CustomerandCrisisSupportController {
             
             // to make updating optional
             const updatedCustomerAndCrisisSupportData = {
-                _username: customerAndCrisisSupportData.username || existingCustomerAndCrisisSupport.username,
-                _password: existingCustomerAndCrisisSupport.password, // no or cause it is done below
-                _email: customerAndCrisisSupportData.email || existingCustomerAndCrisisSupport.email,
-                _name: customerAndCrisisSupportData.name || existingCustomerAndCrisisSupport.name,
-                _dateOfBirth: customerAndCrisisSupportData.dateOfBirth || existingCustomerAndCrisisSupport.dateOfBirth,
-                _phoneNumber: customerAndCrisisSupportData.phoneNumber || existingCustomerAndCrisisSupport.phoneNumber,
-                _profilePic: existingCustomerAndCrisisSupport.profilePic
+                _username: customerAndCrisisSupportData.username || existingCustomerAndCrisisSupport._username,
+                _password: existingCustomerAndCrisisSupport._password, // no or cause it is done below
+                _email: customerAndCrisisSupportData.email || existingCustomerAndCrisisSupport._email,
+                _name: customerAndCrisisSupportData.name || existingCustomerAndCrisisSupport._name,
+                _dateOfBirth: customerAndCrisisSupportData.dateOfBirth || existingCustomerAndCrisisSupport._dateOfBirth,
+                _phoneNumber: customerAndCrisisSupportData.phoneNumber || existingCustomerAndCrisisSupport._phoneNumber,
+                _profilePic: existingCustomerAndCrisisSupport._profilePic
             };
 
             //first check if the profile pic has been changed
@@ -225,7 +225,7 @@ class CustomerandCrisisSupportController {
             const customerAndCrisisSupport = await customerAndCrisisSupportCollection.findOne({ _customerSupportId: customerSupportId });
 
             if(!customerAndCrisisSupport) {
-                return res.status(204).json({ "message": `No customerAndCrisisSupport matches ID ${req.body.id}.` })
+                return res.status(404).json({ "message": `No customerAndCrisisSupport matches ID ${req.body.id}.` })
             }
             const deletedCustomerAndCrisisSupport = await customerAndCrisisSupportCollection.deleteOne({ _customerSupportId: customerSupportId });
             res.json( { "message": 'CustomerAndCrisisSupport successfully deleted ' });

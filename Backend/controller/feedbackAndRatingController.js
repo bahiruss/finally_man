@@ -8,14 +8,14 @@ class FeedbackAndRatingController {
 
     getFeedbacks = async (req, res) => {
         try{
-            const { page = 1, limit = 10 } = req.query; 
+            const { page = 1, limit = 10 } = req.query;
 
             const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
 
             const startIndex = (page - 1) * limit;
             const endIndex = page * limit;
 
-            const feedbacks = await feedbackAndRatingCollection.find({}, {
+            const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: req.params.id}, {
                 projection: {
                     _id: 0,
                     feedbackID: "$_feedbackId", 
@@ -78,7 +78,7 @@ class FeedbackAndRatingController {
             const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
             
 
-            const feedbacks = await feedbackAndRatingCollection.find({ _rating: parseInt(rating) }, {
+            const feedbacks = await feedbackAndRatingCollection.find({ _rating: parseInt(rating), _therapistId: req.params.id }, {
                 projection: {
                     _id: 0,
                     feedbackID: "$_feedbackId", 
@@ -107,7 +107,7 @@ class FeedbackAndRatingController {
                 const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
                 const patientCollection = await this.db.getDB().collection('patients');
 
-                const patient = await patientCollection.findOne({ _userId: feedbackData.raterId });
+                const patient = await patientCollection.findOne({ _userId: feedbackData.userId });
 
                 //check if the patient exists
                 if(!patient) return res.status(404).json({ message: 'Patient can not be found'});
@@ -116,6 +116,12 @@ class FeedbackAndRatingController {
                 if(!feedbackData.userId || !feedbackData.therapistId || !feedbackData.rating || !feedbackData.comment)
                 {
                     return res.status(400).json({ message: 'missing required fields '});
+                }
+
+                // Check if the rating is between 1 and 5
+                const rating = parseFloat(feedbackData.rating);
+                if (rating < 1 || rating > 5) {
+                    return res.status(400).json({ message: 'Rating must be between 1 and 5' });
                 }
 
                 const feedbackAndRating = new FeedbackAndRating();
@@ -152,7 +158,7 @@ class FeedbackAndRatingController {
                 return res.status(404).json({ message: 'Feedback not found' });
             }
 
-            if(feedbackData.raterId !== existingFeedback._raterId) {
+            if(feedbackData.userId !== existingFeedback._raterId) {
                 return res.status(401).json({ message: 'Not authorized to update this feedback' });
             }
             const updatedData = { 

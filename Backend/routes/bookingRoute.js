@@ -16,10 +16,10 @@ const bookingRouter = (db) => {
     router.route('/:id/cancel')
     .put(bookingController.cancelBooking);
 
-    router.route('/user/:sessionMode/:id')
+    router.route('/user/:sessionMode')
     .get(bookingController.getBookingsByUserId);
 
-    router.route('/user/:sessionMode/:sessionType/:id')
+    router.route('/user/:sessionMode/:sessionType')
     .get(bookingController.getBookingsBySessionType);
 
 

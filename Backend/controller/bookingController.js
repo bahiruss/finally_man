@@ -14,11 +14,11 @@ class BookingController {
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
             
-            if (!req?.params?.id) {
+            if (!req?.body?.userId) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
-            const patient = await patientCollection.findOne({_userId : req.params.id });
-            const therapist = await therapistCollection.findOne({_userId : req.params.id });
+            const patient = await patientCollection.findOne({_userId : req.body.userId });
+            const therapist = await therapistCollection.findOne({_userId : req.body.userId });
             
 
             const bookingCollection = await this.db.getDB().collection('bookings');
@@ -85,12 +85,12 @@ class BookingController {
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
             
-            if (!req?.params?.id) {
+            if (!req?.body?.userId) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
 
-            const patient = await patientCollection.findOne({_userId : req.params.id });
-            const therapist = await therapistCollection.findOne({_userId : req.params.id });
+            const patient = await patientCollection.findOne({_userId : req.body.userId });
+            const therapist = await therapistCollection.findOne({_userId : req.body.userId });
 
             const bookingCollection = await this.db.getDB().collection('bookings');
 
@@ -265,7 +265,6 @@ class BookingController {
                 _sessionType: bookingData.sessionType,
                 _sessionMode: 'group'
             });
-            console.log(existingGroupBooking)
     
             // If a group booking exists, update it to include the new patient if not already included
             if (existingGroupBooking) {
@@ -307,16 +306,19 @@ class BookingController {
             // const appointmentDate = new Date(bookingData.date); // Convert the appointment date to a Date object
             // const reminderDate = new Date(appointmentDate.getTime() - 3600000); // Subtract 1 hour from the appointment time
             const reminderDate = new Date();
-            reminderDate.setMinutes(reminderDate.getMinutes() + 5);
+            reminderDate.setMinutes(reminderDate.getMinutes() + 1);
             const commonNotifDetails = {
                 date: booking.date, 
                 time: booking.timeSlot, 
                 location: booking.sessionLocation,
             }
 
+            const notification_patient = new NotificationController();
+            const notification_therapist = new NotificationController();
+
             schedule.scheduleJob(reminderDate, () => {
-                NotificationController.sendNotification(commonNotifDetails, patient._email, patient._name, patient._role) //for patient
-                NotificationController.sendNotification(commonNotifDetails, therapist._email, therapist._name, therapist._role) //for therapist
+                notification_patient.sendNotification(commonNotifDetails, therapist._name, patient._email, patient._name, patient._role) //for patient
+                notification_therapist.sendNotification(commonNotifDetails, patient._name, therapist._email, therapist._name, therapist._role) //for therapist
             });
 
 
@@ -519,12 +521,21 @@ class BookingController {
             if (therapist) {
                 canceledBy = therapist._name;
             }
-            console.log(therapist)
             if (patient) {
                 canceledBy = patient._name;
             }
 
-            const booking = await bookingCollection.findOneAndUpdate(
+            //check if booking is already canceled
+            const existingBooking = await bookingCollection.findOne(
+                { _bookingId: req.params.id,  _isCanceled: true }
+            )
+            
+            if (existingBooking) {
+                return res.status(409).json({ 'message': 'Booking is already canceled' });
+            }
+
+            
+            const booking = await bookingCollection.updateOne(
                 { _bookingId: req.params.id },
                 { $set: { _isCanceled: true, _canceledBy: canceledBy } }
             );
@@ -532,6 +543,7 @@ class BookingController {
             if (!booking) {
                 return res.status(404).json({ 'message': 'Booking not found' });
             }
+
 
             res.json({ 'message': 'Booking canceled successfully' });
         } catch (error) {
