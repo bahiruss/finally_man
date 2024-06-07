@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const AdminPage = ({ adminId }) => {
+const AdministratorProfile = ({ adminId }) => {
   const [administrator, setAdministrator] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -37,9 +37,15 @@ const AdminPage = ({ adminId }) => {
           <h2>Administrator Information</h2>
           <p>User ID: {administrator.userId}</p>
           <p>Username: {administrator.username}</p>
+          <p>Password: {administrator.password}</p>
           <p>Email: {administrator.email}</p>
           <p>Name: {administrator.name}</p>
-          {/* Add more details as needed */}
+          <p>Date of Birth: {administrator.dateOfBirth}</p>
+          <p>Phone Number: {administrator.phoneNumber}</p>
+          <p>Registration Date: {administrator.registrationDate}</p>
+          <p>Profile Picture: {administrator.profilePic}</p>
+          <p>Admin ID: {administrator.adminId}</p>
+          {/* Add more fields as needed */}
         </div>
       ) : (
         <div>Loading...</div>
@@ -48,4 +54,4 @@ const AdminPage = ({ adminId }) => {
   );
 };
 
-export default AdminPage;
+export default AdministratorProfile;

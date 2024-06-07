@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const PatientPage = ({ patientId }) => {
+const PatientProfile = ({ patientId }) => {
   const [patient, setPatient] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -37,9 +37,15 @@ const PatientPage = ({ patientId }) => {
           <h2>Patient Information</h2>
           <p>User ID: {patient.userId}</p>
           <p>Username: {patient.username}</p>
+          <p>Password: {patient.password}</p>
           <p>Email: {patient.email}</p>
           <p>Name: {patient.name}</p>
-          {/* Add more details as needed */}
+          <p>Date of Birth: {patient.dateOfBirth}</p>
+          <p>Phone Number: {patient.phoneNumber}</p>
+          <p>Registration Date: {patient.registrationDate}</p>
+          <p>Profile Picture: {patient.profilePic}</p>
+          <p>Patient ID: {patient.patientId}</p>
+          {/* Add more fields as needed */}
         </div>
       ) : (
         <div>Loading...</div>
@@ -48,4 +54,4 @@ const PatientPage = ({ patientId }) => {
   );
 };
 
-export default PatientPage;
+export default PatientProfile;
