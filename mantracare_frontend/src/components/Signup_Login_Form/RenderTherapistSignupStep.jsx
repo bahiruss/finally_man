@@ -5,6 +5,7 @@ import { GrMail } from 'react-icons/gr';
 const RenderTherapistSignupStep = ({ 
     username, email, password, name, dob, phoneNumber, address, specialization, 
     experience, education, description, profilePic, educationCertificate, license, 
+    aboutDesc, educationDesc, experienceDesc, specializationDesc,
     setUsername, setEmail, setPassword, setName, setDob, setPhoneNumber, setAddress, 
     setSpecialization, setExperience, setEducation, setDescription, setProfilePic, 
     setEducationCertificate, setLicense, setAboutDesc, setSpecializationDesc, setExperienceDesc, setEducationDesc, signupStep, handleNextStep, handlePrevStep,
@@ -77,7 +78,7 @@ const RenderTherapistSignupStep = ({
                 <>
                     <div className="input-field">
                         <label htmlFor="about-description">About</label>
-                        <textarea id="about-description" value={description} onChange={(e) => setAboutDesc(e.target.value)}></textarea>
+                        <textarea id="about-description" value={aboutDesc} onChange={(e) => setAboutDesc(e.target.value)}></textarea>
                     </div>
                     
                     <div className="buttons">
@@ -92,7 +93,7 @@ const RenderTherapistSignupStep = ({
                 <>
                     <div className="input-field">
                         <label>Specialization</label>
-                        <textarea id="specialization-description" value={description} onChange={(e) => setSpecializationDesc(e.target.value)}></textarea>
+                        <textarea id="specialization-description" value={specializationDesc} onChange={(e) => setSpecializationDesc(e.target.value)}></textarea>
                     </div>
                     
                     <div className="buttons">
@@ -107,7 +108,7 @@ const RenderTherapistSignupStep = ({
                 <>
                     <div className="input-field">
                         <label htmlFor='experience-description'>Experience</label>
-                        <textarea id="experience-description" value={description} onChange={(e) => setExperienceDesc(e.target.value)}></textarea>
+                        <textarea id="experience-description" value={experienceDesc} onChange={(e) => setExperienceDesc(e.target.value)}></textarea>
                     </div>
                     
                     <div className="buttons">
@@ -122,7 +123,7 @@ const RenderTherapistSignupStep = ({
                 <>
                     <div className="input-field">
                         <label htmlFor='education-description'>Education</label>
-                        <textarea id='education-description' value={description} onChange={(e) => setEducationDesc(e.target.value)}></textarea>
+                        <textarea id='education-description' value={educationDesc} onChange={(e) => setEducationDesc(e.target.value)}></textarea>
                     </div>
                     
                     <div className="buttons">

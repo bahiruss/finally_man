@@ -494,9 +494,13 @@ const handleTherapistRegistration = async (e) => {
                     setEducationCertificate={setEducationCertificate}
                     setLicense={setLicense}
                     signupStep={signupStep}
+                    aboutDesc={aboutDesc}
                     setAboutDesc={setAboutDesc}
+                    educationDesc={educationDesc}
                     setEducationDesc={setEducationDesc}
+                    experienceDesc={experienceDesc}
                     setExperienceDesc={setExperienceDesc}
+                    specializationDesc={specializationDesc}
                     setSpecializationDesc={setSpecializationDesc}
                     handleNextStep={handleNextStep}
                     handlePrevStep={handlePrevStep}
