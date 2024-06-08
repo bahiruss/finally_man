@@ -43,6 +43,7 @@ class AuthController {
                 foundUser = await patientCollection.findOne({ _email: loginData.email });
                 if (!foundUser) {
                     foundUser = await therapistCollection.findOne({ _email: loginData.email });
+                    if(foundUser._approved == false) return res.status(401).json({ message: 'U have not been authorized'})
                 }
                 if (!foundUser) {
                     foundUser = await administratorCollection.findOne({ _email: loginData.email });

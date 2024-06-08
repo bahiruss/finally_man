@@ -372,7 +372,7 @@ class TherapistController {
         
             await therapistCollection.insertOne(therapist);
 
-            res.status(201).json({ 'message': 'Therapist created successfully' });
+            res.status(201).json({ 'message': 'Therapist created successfully', 'id':therapist._therapistId });
             } catch (error) {
                 console.error('Error creating therapist:', error);
                 res.status(500).json({ 'message': 'Failed to create therapist' });

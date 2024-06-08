@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import {createBrowserRouter,RouterProvider} from "react-router-dom";
 
@@ -29,7 +29,15 @@ const router = createBrowserRouter([
   
 ]);
 function App() {
-
+  useEffect(() => {
+    const fetchUser = async() => {
+      let url ='http://localhost:3500/therapists/9cecf304-97d8-4628-b1d3-7cb6ecae0521'
+      const response = await fetch(url);
+      const data = await response.json()
+      console.log(data)
+    }
+    fetchUser();
+  })
   return (
    <main> 
    <RouterProvider router={router}>

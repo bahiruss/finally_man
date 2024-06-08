@@ -135,6 +135,7 @@ const handleTherapistRegistration = async (e) => {
           progress: undefined,
           theme: "light",
       });
+      console.log(responseData.id)
       resetForm();
       setTimeout(() => {
           setIsSignUpMode(false);
