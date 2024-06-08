@@ -13,6 +13,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import PasswordInput from '../PasswordInput/PasswordInput';
 import IconComponent from '../IconComponent/IconComponent';
 import './Signup_Login_Form.css';
+import RenderPatientSignupStep from './RenderPatientSignupStep';
+import RenderTherapistSignupStep from './RenderTherapistSignupStep';
 // import { navigate } from '@reach/router';
 
 
@@ -21,58 +23,129 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
   const [isForgotPassMode, setIsForgotPassMode] = useState(false);
   const [isEmailverified, setIsEmailverified] = useState(false);
   const [isOtpverified, setIsOtpverified] = useState(false);
-  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword,setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [role,setRole] = useState('Patient');
   const[loader,setLoader] = useState(false);
+  const [name, setName] = useState('');
+  const [dob, setDob] = useState('');
+  const [profilePic, setProfilePic] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [signupStep, setSignupStep] = useState(1);
+  const [address, setAddress] = useState('');
+  const [specialization, setSpecialization] = useState('');
+  const [experience, setExperience] = useState('');
+  const [education, setEducation] = useState('');
+  const [aboutDesc, setAboutDesc] = useState('');
+  const [specializationDesc, setSpecializationDesc] = useState('');
+  const [experienceDesc, setExperienceDesc] = useState('');
+  const [educationDesc, setEducationDesc] = useState('');
+  const [educationCertificate, setEducationCertificate] = useState(null);
+  const [license, setLicense] = useState(null);
   // const [loginSuccess, setLoginSuccess] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleRegisterClick = async (e) => {
+  const handlePatientRegistration = async (e) => {
     e.preventDefault();
     try {
-      let url = 'http://localhost:3000/auth/login'
-      const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(
-            {
-              loginMode: 'email',
-              email: email,
-              password: password
-            }
-          ),
-      })
+        let url = 'http://localhost:3500/patients';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password,
+                name: name,
+                dateOfBirth: dob,
+                profilePic: profilePic,
+                phoneNumber: phoneNumber
+            }),
+        });
 
-    
-      
-      
-      console.log(responseData)
-
-       toast(response.data.message, {
-        position: "top-right",
-        autoClose: 1200,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      setTimeout(() => {
-      setIsSignUpMode(false);
-      }, 1200);
+        // Assuming the response is in JSON format
+        const responseData = await response.json();
+        toast(responseData.message, {
+            position: "top-right",
+            autoClose: 1200,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+        setTimeout(() => {
+            setIsSignUpMode(false);
+        }, 1200);
+        resetForm();
     } catch (error) {
-      console.error(error);
-      toast.error('An error occurred while updating profile.');
+        console.error(error);
+        toast.error('An error occurred while updating profile.');
     }
-  };
+};
+
+
+  const handleTherapistRegistration = async (e) => {
+    e.preventDefault();
+    try {
+        let url = 'http://localhost:3500/therapists';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password,
+                name: name,
+                dateOfBirth: dob,
+                phoneNumber: phoneNumber,
+                address: address,
+                specialization: specialization,
+                experience: experience,
+                education: education,
+                description: {
+                  aboutDesc: aboutDesc,
+                  experienceDesc: experienceDesc,
+                  educationDesc: educationDesc,
+                  specializationDesc: specializationDesc
+                },
+                profilePic: profilePic,
+                educationCertificate: educationCertificate,
+                license: license
+            }),
+        });
+
+        // Assuming the response is in JSON format
+        const responseData = await response.json();
+        toast(responseData.message, {
+            position: "top-right",
+            autoClose: 1200,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+        });
+        resetForm();
+        setTimeout(() => {
+            setIsSignUpMode(false);
+        }, 1200);
+    } catch (error) {
+        console.error(error);
+        toast.error('An error occurred while updating profile.');
+    }
+};
+
 
   const handleLoginClick = async (e) => {
     e.preventDefault();
@@ -111,7 +184,7 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
         progress: undefined,
         theme: "light",
       });
-
+      resetForm();
       // Redirect to '/ProfilePage' if needed
       // window.location = '/ProfilePage';
 
@@ -121,11 +194,35 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
     }
   };
 
+
+  const resetForm = () => {
+    setUsername('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setOtp('');
+    setName('');
+    setDob('');
+    setProfilePic(null);
+    setPhoneNumber('');
+    setSignupStep(1);
+    setAddress('');
+    setSpecialization('');
+    setExperience('');
+    setEducation('');
+    setAboutDesc('');
+    setEducationDesc('');
+    setExperienceDesc('');
+    setSpecializationDesc('')
+    setEducationCertificate(null);
+    setLicense(null);
+  };
+
   const handleSignUpClick = () => {
     setIsSignUpMode(true);
     setEmail('');
     setPassword('');
-    setFullName('');
+    setUsername('');
     setIsForgotPassMode(false);
     setIsEmailverified(false);
     setIsOtpverified(false);
@@ -250,6 +347,18 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
   }
   };
 
+  const handleNextStep = () => {
+    setSignupStep(prevStep => prevStep + 1);
+    console.log(signupStep); 
+  };
+
+  const handlePrevStep = () => {
+      setSignupStep(prevStep => prevStep - 1);
+      console.log(signupStep); 
+  };
+
+  
+
  
 
   return (
@@ -332,17 +441,68 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
           {/* Sign Up Form */}
           <form className="sign-up-form">
             <h2 className="title">Sign up</h2>
-            <IconComponent role={role} setRole={setRole} />
-            <div className="input-field">
-              <i><FaUser /></i>
-              <input type="text" className='focus:ring-0' placeholder="Username" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-            </div>
-            <div className="input-field">
-              <i><GrMail /></i>
-              <input type="email" className='focus:ring-0' placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <PasswordInput password={password} setPassword={setPassword} placeholder={"Password"}/>
-            <input type="submit" className="btn1" value="Sign up" onClick={handleRegisterClick} />
+            <IconComponent role={role} setRole={setRole} resetForm={resetForm} setSignupStep={setSignupStep}/>
+            {role === 'Patient' ? (
+                  <RenderPatientSignupStep
+                    username={username}
+                    email={email}
+                    password={password}
+                    name={name}
+                    dob={dob}
+                    profilePic={profilePic}
+                    phoneNumber={phoneNumber}
+                    setUsername={setUsername}
+                    setEmail={setEmail}
+                    setPassword={setPassword}
+                    setName={setName}
+                    setDob={setDob}
+                    setProfilePic={setProfilePic}
+                    setPhoneNumber={setPhoneNumber}
+                    signupStep={signupStep}
+                    handleNextStep={handleNextStep}
+                    handlePrevStep={handlePrevStep}
+                    confirmPassword={confirmPassword}
+                    setConfirmPassword={setConfirmPassword}
+                    handlePatientRegistration={handlePatientRegistration}
+                  />
+                ) : (
+                  <RenderTherapistSignupStep
+                    username={username}
+                    email={email}
+                    password={password}
+                    name={name}
+                    dob={dob}
+                    phoneNumber={phoneNumber}
+                    address={address}
+                    specialization={specialization}
+                    experience={experience}
+                    education={education}
+                    profilePic={profilePic}
+                    educationCertificate={educationCertificate}
+                    license={license}
+                    setUsername={setUsername}
+                    setEmail={setEmail}
+                    setPassword={setPassword}
+                    setName={setName}
+                    setDob={setDob}
+                    setPhoneNumber={setPhoneNumber}
+                    setAddress={setAddress}
+                    setSpecialization={setSpecialization}
+                    setExperience={setExperience}
+                    setEducation={setEducation}
+                    setProfilePic={setProfilePic}
+                    setEducationCertificate={setEducationCertificate}
+                    setLicense={setLicense}
+                    signupStep={signupStep}
+                    setAboutDesc={setAboutDesc}
+                    setEducationDesc={setEducationDesc}
+                    setExperienceDesc={setExperienceDesc}
+                    setSpecializationDesc={setSpecializationDesc}
+                    handleNextStep={handleNextStep}
+                    handlePrevStep={handlePrevStep}
+                    handleTherapistRegistration={handleTherapistRegistration}
+                  />
+                )}
           </form>
           
         </div>
