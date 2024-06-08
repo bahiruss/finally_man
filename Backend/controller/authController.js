@@ -18,7 +18,7 @@ class AuthController {
             }
 
             //check if all fields are sent 
-            if(loginMode === 'email' && !loginData.username) {
+            if(loginMode === 'username' && !loginData.username) {
                 return res.status(400).json({ 'message': 'Username  is required for login'});
             }
 
@@ -65,7 +65,7 @@ class AuthController {
     
             // User not found
             if (!foundUser) { 
-                return res.sendStatus(401);
+                return res.status(401).json({message: 'user not found'});
             }
     
             // Check the password and if valid create token
@@ -85,7 +85,7 @@ class AuthController {
                 );
                 res.json({ accessToken: accessToken, role: role });
             } else {
-                return res.sendStatus(401);
+                return res.status(401).json({ message: 'incorrect password'});
             }
         } catch (error) {
             console.error('Error in handleLogin:', error);

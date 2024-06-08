@@ -6,10 +6,11 @@ class BookingController {
     constructor (db) {
         this.db = db;
     } 
-    getBookingsByUserId = async(req, res) => {
+    getBookingsByLocation = async(req, res) => {
         try {
 
             const sessionMode = req.params.sessionMode;
+            const sessionLocation = req.params.sessionLocation
 
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
@@ -25,7 +26,7 @@ class BookingController {
 
             //if userId is that of a patient
             if(patient){
-                const bookings = await bookingCollection.find({'_patientInfo.id': patient._patientId, _sessionMode: sessionMode },{
+                const bookings = await bookingCollection.find({'_patientInfo.id': patient._patientId, _sessionMode: sessionMode, _sessionLocation: sessionLocation },{
                     projection: {
                         bookingId: '$_bookingId',
                         patientInfo: '$_patientInfo',
@@ -50,7 +51,7 @@ class BookingController {
 
             //if userId is of a therapist
             if (therapist) {
-                const bookings = await bookingCollection.find({_therapistId: therapist._therapistId, _sessionMode: sessionMode},{
+                const bookings = await bookingCollection.find({_therapistId: therapist._therapistId, _sessionMode: sessionMode, _sessionLocation: sessionLocation },{
                     projection: {
                         bookingId: '$_bookingId',
                         patientInfo: '$_patientInfo',
@@ -96,7 +97,7 @@ class BookingController {
 
             //if userId is that of a patient
             if(patient){
-                const bookings = await bookingCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: sessionType, _sessionMode: sessionMode },{
+                const bookings = await bookingCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: sessionType, _sessionMode: sessionMode, _sessionLocation: 'online' },{
                     projection: {
                         bookingId: '$_bookingId',
                         patientInfo: '$_patientInfo',
@@ -121,7 +122,7 @@ class BookingController {
 
             //if userId is of a therapist
             if (therapist) {
-                const bookings = await bookingCollection.find({ _therapistId: therapist._therapistId, _sessionType: sessionType, _sessionMode: sessionMode },{
+                const bookings = await bookingCollection.find({ _therapistId: therapist._therapistId, _sessionType: sessionType, _sessionMode: sessionMode, _sessionLocation: 'online' },{
                     projection: {
                         bookingId: '$_bookingId',
                         patientInfo: '$_patientInfo',
@@ -183,7 +184,6 @@ class BookingController {
             res.status(500).json({ 'message': 'Failed to fetch booking' });
         }
     }
-
     createBooking = async (req, res) => {
         try {
             const bookingCollection = await this.db.getDB().collection('bookings');
@@ -219,11 +219,12 @@ class BookingController {
             }
             
             // Check therapist's availability for the specified day and time slot
-            
             const bookingWeekday = bookingDate.toLocaleDateString('en-US', { weekday: 'long' });
             const therapistSchedule = await scheduleCollection.findOne({_therapistId: therapist._therapistId});
     
             let sessionMode = '';
+            let sessionLocation = '';
+            let sessionTitle = '';
     
             if (therapistSchedule) {
                 const { _oneOnOneAvailability, _groupAvailability } = therapistSchedule;
@@ -235,12 +236,19 @@ class BookingController {
                     const _groupAvailabilityForDay = _groupAvailability.find(avail => avail.day.toLowerCase() === bookingWeekday.toLowerCase());
                     if (_groupAvailabilityForDay && _groupAvailabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
                         sessionMode = 'group';
+                        sessionLocation = _groupAvailabilityForDay.sessionLocation;
+                        sessionTitle = _groupAvailabilityForDay.title;
                     }
                 }
             }
     
             if (!sessionMode) {
                 return res.status(400).json({ message: 'Therapist not available at the specified time' });
+            }
+    
+            // If the session is in-person and one-on-one, set sessionType to null
+            if (bookingData.sessionLocation === 'in-person' && sessionMode === 'one-on-one') {
+                bookingData.sessionType = null;
             }
     
             // Check if the booking exists for one-on-one
@@ -290,21 +298,22 @@ class BookingController {
             booking.sessionType = bookingData.sessionType;
             booking.sessionMode = sessionMode;
             booking.sessionLocation = bookingData.sessionLocation;
-
-              // Set sessionTitle for group sessions
+    
+            // Set sessionTitle for group sessions
             if (sessionMode === 'group') {
-            if (!bookingData.sessionTitle) {
-                return res.status(400).json({ message: 'sessionTitle is required for group sessions' });
+                booking.sessionLocation = sessionLocation;
+                booking.sessionTitle = sessionTitle;
+                if (sessionLocation === 'in-person') {
+                    booking.sessionType = null;
+                }
+                if (!sessionTitle) {
+                    return res.status(400).json({ message: 'sessionTitle is required for group sessions' });
+                }
             }
-            booking.sessionTitle = bookingData.sessionTitle;
-        }
     
             await bookingCollection.insertOne(booking);
-
-
+    
             // To send notification mail
-            // const appointmentDate = new Date(bookingData.date); // Convert the appointment date to a Date object
-            // const reminderDate = new Date(appointmentDate.getTime() - 3600000); // Subtract 1 hour from the appointment time
             const reminderDate = new Date();
             reminderDate.setMinutes(reminderDate.getMinutes() + 1);
             const commonNotifDetails = {
@@ -312,16 +321,14 @@ class BookingController {
                 time: booking.timeSlot, 
                 location: booking.sessionLocation,
             }
-
+    
             const notification_patient = new NotificationController();
             const notification_therapist = new NotificationController();
-
+    
             schedule.scheduleJob(reminderDate, () => {
                 notification_patient.sendNotification(commonNotifDetails, therapist._name, patient._email, patient._name, patient._role) //for patient
                 notification_therapist.sendNotification(commonNotifDetails, patient._name, therapist._email, therapist._name, therapist._role) //for therapist
             });
-
-
     
             res.status(201).json({ message: 'Booking created successfully' });
         } catch (error) {
@@ -534,7 +541,7 @@ class BookingController {
                 return res.status(409).json({ 'message': 'Booking is already canceled' });
             }
 
-            
+
             const booking = await bookingCollection.updateOne(
                 { _bookingId: req.params.id },
                 { $set: { _isCanceled: true, _canceledBy: canceledBy } }

@@ -82,6 +82,7 @@ class ScheduleController {
             const scheduleData = req.body;
         
             const scheduleCollection = await this.db.getDB().collection('schedules');
+            const therapistCollection = await this.db.getDB().collection('therapists');
 
             const existingSchedule = await scheduleCollection.findOne({ _scheduleId: scheduleId });
         
@@ -89,7 +90,13 @@ class ScheduleController {
                 return res.status(404).json({ 'message': 'Schedule not found' });
             }
 
-            
+            // Check if the authenticated user is the owner of the schedule
+            const therapist = await therapistCollection.findOne({ _userId: req.body.userId });
+            if (existingSchedule._therapistId !== therapist?._therapistId) {
+                return res.status(403).json({ 'message': 'You are not authorized to update this schedule' });
+            }
+
+
             const updatedScheduleData = {
                 _oneOnOneAvailability: scheduleData.oneOnOneAvailability || existingSchedule._oneOnOneAvailability,
                 _groupAvailability: scheduleData.groupAvailability || existingSchedule._groupAvailability,

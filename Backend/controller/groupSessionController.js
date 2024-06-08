@@ -6,7 +6,7 @@ class GroupSessionController {
 
     getVideoSessions = async (req, res) => {
         try{
-            const userId  = req.params.id;
+            const userId  = req.body.userId;
 
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
@@ -61,7 +61,7 @@ class GroupSessionController {
 
     getTextSessions = async (req, res) => {
         try{
-            const userId  = req.params.id;
+            const userId  = req.body.userId;
 
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
