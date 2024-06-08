@@ -11,14 +11,10 @@ const groupSessionRouter = (db) => {
 
     router.route('/text-sessions')
         .post(groupSessionController.createTextSession)
-
-    router.route('/text-sessions/user/:id')
         .get(groupSessionController.getTextSessions)
 
     router.route('/video-sessions')
         .post(groupSessionController.createVideoSessions)
-
-    router.route('/video-sessions/user/:id')
         .get(groupSessionController.getVideoSessions)
 
     router.route('/removeParticipant')
