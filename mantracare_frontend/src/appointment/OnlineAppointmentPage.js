@@ -11,6 +11,8 @@ const OnlineAppointmentsPage = () => {
     const [errorMessages, setErrorMessages] = useState('');
     const [sessionMode, setSessionMode] = useState('one-on-one');
     const [sessionType, setSessionType] = useState('text-chat');
+    const yourAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VySWQiOiI3YmJmMDE4Mi1lY2YxLTQ5MmEtOGFhZS1jNjBhNGNjODliYTUiLCJyb2xlIjoiUGF0aWVudCJ9LCJpYXQiOjE3MTc3ODc1NTcsImV4cCI6MTcxNzg3Mzk1N30.bSCruqGayYNDOoQYSQh8eqqN6x99LQmZUDdZyKQxft8"
+
     const navigate = useNavigate();
     let baseUrl = `http://localhost:3500/bookings/sessionMode`
 
@@ -25,8 +27,7 @@ const OnlineAppointmentsPage = () => {
             setAppointments([]);
             setIsLoading(true);
             let url = `${baseUrl}/${sessionMode}/sessionType/${sessionType}`;
-            const yourAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VySWQiOiI3YmJmMDE4Mi1lY2YxLTQ5MmEtOGFhZS1jNjBhNGNjODliYTUiLCJyb2xlIjoiUGF0aWVudCJ9LCJpYXQiOjE3MTc3ODc1NTcsImV4cCI6MTcxNzg3Mzk1N30.bSCruqGayYNDOoQYSQh8eqqN6x99LQmZUDdZyKQxft8"
-
+            
             const requestOptions = {
               method: 'GET',
               headers: {
@@ -52,21 +53,43 @@ const OnlineAppointmentsPage = () => {
             }
             console.log(appointments)
         } catch (error) {
-          setErrorMessages('Failed to fetch administrator');
+          setErrorMessages('Failed to fetch appointments');
         } finally {
           setIsLoading(false)
         }
 
     };
 
-    const fetchTextSessions = async () => {
+    const fetchTextSessions = async (sessionMode) => {
       try {
-        setTextSessions([]);
         let url;
-         
-        `${baseUrl}/`
-      } catch {
+        const mode = (sessionMode == 'one-on-one')? 'sessions' : 'groupSessions'
+          
+        setTextSessions([]);
+        url = `${baseUrl}/${mode}/text-sessions`;
 
+        const requestOptions = {
+          method: 'GET',
+          headers: {
+              'Authorization': `Bearer ${yourAuthToken}`, // Replace yourAuthToken with your actual token
+              'Content-Type': 'application/json'
+          }
+      };
+      
+        const response = await fetch(url, requestOptions);
+          
+        if(response.ok) {
+          const data = await response.json();
+          setTextSessions(data);
+        } else if (response.status === 204) {
+            // Handle the case when no appointments are found
+            setTextSessions([]);
+        } else{
+          errorMessages = await response.json();
+          setErrorMessages(errorMessages);
+        } 
+      } catch {
+        setErrorMessages('Failed to fetch session');
       }
     }
 
@@ -80,6 +103,29 @@ const OnlineAppointmentsPage = () => {
 
 
 
+    const createTextSession = async (appointment) =>{
+      fetchTextSessions(appointment.sessionMode);
+      textSessions.forEach(session => {
+        const appointmentPatientIds = appointment.patientInfo.map(patient => patient.id).sort();
+        const sessionPatientIds = session.patientInfo.map(patient => patient.id).sort();
+  
+        if (
+          session.therapistId === appointment.therapistId &&
+          JSON.stringify(appointmentPatientIds) === JSON.stringify(sessionPatientIds)
+        ) {
+          // Perform your desired action if a match is found
+          console.log('Match found:', session);
+          navigate(`/room/text/${session.id}`);
+        } else {
+          const response = fetch(`${baseUrl}/${mode}`)
+        }
+      });
+
+    }
+  
+    const createVideoSession = (appointment) =>{
+  
+    }
 
 
   const handleSessionTypeChange = (sessionType) => {
@@ -88,14 +134,6 @@ const OnlineAppointmentsPage = () => {
 
   const handleSessionModeChange = (sessionMode) => {
     setSessionMode(sessionMode)
-  }
-
-  const createTextSession = (appointment) =>{
-
-  }
-
-  const createVideoSession = (appointment) =>{
-
   }
 
   return (
