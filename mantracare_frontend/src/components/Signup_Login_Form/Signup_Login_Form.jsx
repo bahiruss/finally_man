@@ -93,59 +93,58 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
 
 
 
-  const handleTherapistRegistration = async (e) => {
-    e.preventDefault();
-    try {
-        let url = 'http://localhost:3500/therapists';
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: username,
-                email: email,
-                password: password,
-                name: name,
-                dateOfBirth: dob,
-                phoneNumber: phoneNumber,
-                address: address,
-                specialization: specialization,
-                experience: experience,
-                education: education,
-                description: {
-                  aboutDesc: aboutDesc,
-                  experienceDesc: experienceDesc,
-                  educationDesc: educationDesc,
-                  specializationDesc: specializationDesc
-                },
-                profilePic: profilePic,
-                educationCertificate: educationCertificate,
-                license: license
-            }),
-        });
+const handleTherapistRegistration = async (e) => {
+  e.preventDefault();
+  try {
+      let url = 'http://localhost:3500/therapists';
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('name', name);
+      formData.append('dateOfBirth', dob);
+      formData.append('phoneNumber', phoneNumber);
+      formData.append('address', address);
+      formData.append('specialization', specialization);
+      formData.append('experience', experience);
+      formData.append('education', education);
+      formData.append('description', JSON.stringify({
+          aboutDesc: aboutDesc,
+          experienceDesc: experienceDesc,
+          educationDesc: educationDesc,
+          specializationDesc: specializationDesc
+      }));
+      formData.append('profilePic', profilePic); // Append the profile picture as a file
+      formData.append('educationCertificate', educationCertificate); // Append the education certificate as a file
+      formData.append('license', license); // Append the license as a file
 
-        // Assuming the response is in JSON format
-        const responseData = await response.json();
-        toast(responseData.message, {
-            position: "top-right",
-            autoClose: 1200,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-        resetForm();
-        setTimeout(() => {
-            setIsSignUpMode(false);
-        }, 1200);
-    } catch (error) {
-        console.error(error);
-        toast.error('An error occurred while updating profile.');
-    }
+      const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          
+      });
+
+      const responseData = await response.json();
+      toast(responseData.message, {
+          position: "top-right",
+          autoClose: 1200,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+      });
+      resetForm();
+      setTimeout(() => {
+          setIsSignUpMode(false);
+      }, 1200);
+  } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while updating profile.');
+  }
 };
+
 
 
   const handleLoginClick = async (e) => {
