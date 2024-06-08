@@ -53,23 +53,23 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
     e.preventDefault();
     try {
         let url = 'http://localhost:3500/patients';
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('name', name);
+        formData.append('dateOfBirth', dob);
+        formData.append('phoneNumber', phoneNumber);
+        formData.append('profilePic', profilePic); // Append the profile picture as a file
+
         const response = await fetch(url, {
             method: 'POST',
+            body: formData,
             headers: {
-                'Content-Type': 'application/json',
+                // Set the content type
             },
-            body: JSON.stringify({
-                username: username,
-                email: email,
-                password: password,
-                name: name,
-                dateOfBirth: dob,
-                profilePic: profilePic,
-                phoneNumber: phoneNumber
-            }),
         });
 
-        // Assuming the response is in JSON format
         const responseData = await response.json();
         toast(responseData.message, {
             position: "top-right",
@@ -90,6 +90,7 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
         toast.error('An error occurred while updating profile.');
     }
 };
+
 
 
   const handleTherapistRegistration = async (e) => {
