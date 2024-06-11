@@ -64,7 +64,7 @@ class PatientController {
             if (!patient) {
                 return res.status(404).json({ 'message': 'Patient not found' });
             }
-        
+            console.log(patient)
             res.json(patient);
             } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch patient' });

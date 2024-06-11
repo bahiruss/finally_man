@@ -1,9 +1,10 @@
 class Message {
-    constructor(messageId, messageContent, sessionId, senderId, timeStamp){
+    constructor(messageId, messageContent, sessionId, senderId, senderUserName, timeStamp){
         this._messageId = messageId;
         this._messageContent = messageContent;
         this._sessionId = sessionId;
         this._senderId = senderId;
+        this._senderUserName = senderUserName;
         this._timeStamp = timeStamp;       
     }
 
@@ -37,6 +38,14 @@ class Message {
 
     set senderId(senderId) {
         this._senderId = senderId;
+    }
+
+    get senderUserName() {
+        return this._senderUserName;
+    }
+
+    set senderUserName(value) {
+        this._senderUserName = value;
     }
 
     get timeStamp() {

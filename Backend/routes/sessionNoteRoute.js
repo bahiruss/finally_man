@@ -9,7 +9,7 @@ const sessionNoteRouter = (db) => {
     router.route('/')
         .post(sessionNoteController.createNote);
     
-    router.route('/notes/:sessionId')
+    router.route('/session/:sessionId')
         .get(sessionNoteController.getNotes);
 
     router.route('/:id')

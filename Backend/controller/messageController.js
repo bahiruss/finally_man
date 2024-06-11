@@ -8,14 +8,16 @@ class MessageController {
 
     getMessages = async (req, res) => {
         try{
-            const sessionId = req.body.sessionId;
-            const { page = 1, limit = 10 } = req.query; // default just in case it is forgotten to be specified in the frontend
+            const sessionId = req.params.sessionId;
+            // let { page = 1, limit = 30 } = req.query; // default just in case it is forgotten to be specified in the frontend
 
             const messageCollection = await this.db.getDB().collection('messages');
+            //  limit = parseInt(limit);
+            //  page = parseInt(page);
 
             // for the cursors
-            const startIndex = (page - 1) * limit;
-            const endIndex = page * limit;
+            // const startIndex = (page - 1) * limit;
+            // const endIndex = page * limit;
 
             const messages = await messageCollection.find({ _sessionId: sessionId }, {
                 projection: {
@@ -23,16 +25,19 @@ class MessageController {
                     messageId: "$_messageId", 
                     messageContent: "$_messageContent", 
                     sessionId: "$_sessionId", 
-                    senderId: "$_senderId", 
+                    senderId: "$_senderId",
+                    senderUserName: "$_senderUserName", 
                     timeStamp: "$_timeStamp",             
                 }
-            }).sort({ _timeStamp: -1}).skip(startIndex).limit(limit).toArray();
+            }).sort({ _timeStamp: -1}).toArray();
             
             if(!messages.length) return res.status(204).json({ message: 'No messages found' });
             res.json(messages);
+            console.log(messages)
         
         } catch (error) {
             res.status(500).json({ message: 'Failed to fetch messages' });
+            console.log(error)
         }     
     }
 
@@ -41,9 +46,14 @@ class MessageController {
             const messageData = req.body;
 
             const messageCollection = await this.db.getDB().collection('messages');
+            const patientCollection = await this.db.getDB().collection('patients');
+            const therapistCollection = await this.db.getDB().collection('therapists');
+
+            const patient = await patientCollection.findOne({_userId: req.body.userId})
+            const therapist = await therapistCollection.findOne({_userId: req.body.userId})
 
             //check for missing fields
-            if(!messageData.messageContent || !messageData.sessionId || !messageData.senderId) {
+            if(!messageData.messageContent || !messageData.sessionId) {
                 return res.status(400).json({ message: 'Missing required fields! '});
             }
 
@@ -51,10 +61,12 @@ class MessageController {
             message.messageId = uuidv4();
             message.messageContent = messageData.messageContent;
             message.sessionId = messageData.sessionId;
-            message.senderId = messageData.senderId;
-            message.timeStamp = new Date();
+            message.senderUserName = messageData.senderUserName
+            message.senderId = messageData.userId;
+            message.timeStamp = messageData.timeStamp;
 
             await messageCollection.insertOne(message);
+            console.log(message)
             res.status(201).json({ message: 'message created successfully', 'createdMessage': message });
         } catch (error) {
             res.status(500).json({ message: 'Failed to create message'});
@@ -122,6 +134,7 @@ class MessageController {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
 
+            const messageCollection = await this.db.getDB().collection('messages');
             const message = await messageCollection.findOne({ _messageId: req.params.id }, {
                 projection: {
                     _id: 0,
@@ -129,6 +142,7 @@ class MessageController {
                     messageContent: "$_messageContent", 
                     sessionId: "$_sessionId", 
                     senderId: "$_senderId", 
+                    senderUserName: "$_senderUserName",
                     timeStamp: "$_timeStamp",             
                 }
             })
@@ -140,6 +154,7 @@ class MessageController {
         
         } catch (error) {
             res.status(500).json({ message: 'Failed to fetch message by id' });
+            console.log(error)
         }
     }
 }

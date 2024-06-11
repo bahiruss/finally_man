@@ -114,7 +114,7 @@ class BookingController {
     
                     }
                 }).toArray()
-    
+                console.log(bookings)
                 if (!bookings.length) return res.status(204).json({ 'message': 'No bookings found' });
                     res.json(bookings);
     
@@ -146,6 +146,7 @@ class BookingController {
 
         } catch(error) {
             res.status(500).json({ 'message': 'Failed to fetch bookings' });
+            console.log(error)
         }
     }
 
@@ -186,16 +187,7 @@ class BookingController {
     }
     createBooking = async (req, res) => {
         try {
-            const bookingCollection = await this.db.getDB().collection('bookings');
-            const patientCollection = await this.db.getDB().collection('patients');
-            const scheduleCollection = await this.db.getDB().collection('schedules');
-    
             const bookingData = req.body;
-    
-            const patient = await patientCollection.findOne({ _userId: bookingData.userId });
-            if (!patient) {
-                return res.status(400).json({ message: 'Patient not found' });
-            }
     
             // Check if all fields are present
             const requiredFields = ['therapistId', 'therapistName', 'date', 'timeSlot'];
@@ -209,18 +201,23 @@ class BookingController {
                 return res.status(400).json({ message: 'Booking date cannot be in the past' });
             }
     
-            // Find therapist to check availability
-            const therapist = await this.db.getDB().collection('therapists').findOne({
-                _therapistId: bookingData.therapistId,
-            });
+            const db = this.db.getDB();
+            const [patient, therapist, therapistSchedule] = await Promise.all([
+                db.collection('patients').findOne({ _userId: bookingData.userId }),
+                db.collection('therapists').findOne({ _therapistId: bookingData.therapistId }),
+                db.collection('schedules').findOne({ _therapistId: bookingData.therapistId })
+            ]);
+    
+            if (!patient) {
+                return res.status(400).json({ message: 'Patient not found' });
+            }
     
             if (!therapist) {
                 return res.status(400).json({ message: 'Therapist not found' });
             }
-            
+    
             // Check therapist's availability for the specified day and time slot
             const bookingWeekday = bookingDate.toLocaleDateString('en-US', { weekday: 'long' });
-            const therapistSchedule = await scheduleCollection.findOne({_therapistId: therapist._therapistId});
     
             let sessionMode = '';
             let sessionLocation = '';
@@ -229,7 +226,7 @@ class BookingController {
             if (therapistSchedule) {
                 const { _oneOnOneAvailability, _groupAvailability } = therapistSchedule;
                 const availabilityForDay = _oneOnOneAvailability.find(avail => avail.day.toLowerCase() === bookingWeekday.toLowerCase());
-                
+    
                 if (availabilityForDay && availabilityForDay.timeSlots.includes(bookingData.timeSlot)) {
                     sessionMode = 'one-on-one';
                 } else {
@@ -252,6 +249,7 @@ class BookingController {
             }
     
             // Check if the booking exists for one-on-one
+            const bookingCollection = db.collection('bookings');
             if (sessionMode === 'one-on-one') {
                 const existingBooking = await bookingCollection.findOne({
                     _therapistId: bookingData.therapistId,
@@ -288,16 +286,17 @@ class BookingController {
             }
     
             // Create a new booking object if there's no existing group booking
-            const booking = new Booking();
-            booking.bookingId = uuidv4();
-            booking.patientInfo = [{ id: patient._patientId, name: patient._name }];
-            booking.therapistId = bookingData.therapistId;
-            booking.therapistName = bookingData.therapistName;
-            booking.date = bookingData.date;
-            booking.timeSlot = bookingData.timeSlot;
-            booking.sessionType = bookingData.sessionType;
-            booking.sessionMode = sessionMode;
-            booking.sessionLocation = bookingData.sessionLocation;
+            const booking = {
+                bookingId: uuidv4(),
+                patientInfo: [{ id: patient._patientId, name: patient._name }],
+                therapistId: bookingData.therapistId,
+                therapistName: bookingData.therapistName,
+                date: bookingData.date,
+                timeSlot: bookingData.timeSlot,
+                sessionType: bookingData.sessionType,
+                sessionMode: sessionMode,
+                sessionLocation: bookingData.sessionLocation
+            };
     
             // Set sessionTitle for group sessions
             if (sessionMode === 'group') {
@@ -317,20 +316,20 @@ class BookingController {
             const reminderDate = new Date();
             reminderDate.setMinutes(reminderDate.getMinutes() + 1);
             const commonNotifDetails = {
-                date: booking.date, 
-                time: booking.timeSlot, 
+                date: booking.date,
+                time: booking.timeSlot,
                 location: booking.sessionLocation,
-            }
+            };
     
             const notification_patient = new NotificationController();
             const notification_therapist = new NotificationController();
     
             schedule.scheduleJob(reminderDate, () => {
-                notification_patient.sendNotification(commonNotifDetails, therapist._name, patient._email, patient._name, patient._role) //for patient
-                notification_therapist.sendNotification(commonNotifDetails, patient._name, therapist._email, therapist._name, therapist._role) //for therapist
+                notification_patient.sendNotification(commonNotifDetails, therapist._name, patient._email, patient._name, patient._role); // for patient
+                notification_therapist.sendNotification(commonNotifDetails, patient._name, therapist._email, therapist._name, therapist._role); // for therapist
             });
     
-            res.status(201).json({ message: 'Booking created successfully' });
+            res.status(201).json({ message: 'Booking created successfully', 'booking': booking.bookingId });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Failed to create booking' });

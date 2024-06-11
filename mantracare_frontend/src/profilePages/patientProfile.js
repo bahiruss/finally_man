@@ -1,54 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const PatientProfile = ({ patientId }) => {
+const PatientProfile = () => {
   const [patient, setPatient] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [profilePic, setProfilePic] = useState(null);
 
   useEffect(() => {
     const fetchPatient = async () => {
       try {
+        const patientId = "3de08f4e-0c10-42a9-8312-c74a698147d0";
         const response = await fetch(`http://localhost:3500/patients/${patientId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setPatient(data);
-        } else if (response.status === 404) {
-          const errorMessage = await response.json();
-          setErrorMessage(errorMessage.message || 'Patient not found');
-        } else if (response.status === 400) {
-          const errorMessage = await response.json();
-          setErrorMessage(errorMessage.message || 'ID parameter is required');
-        } else {
-          setErrorMessage('Failed to fetch patient');
+        if (!response.ok) {
+          throw new Error('Failed to fetch patient data');
         }
+        const data = await response.json();
+        console.log("Fetched patient data:", data); // Log the fetched data
+
+        setPatient(data);
+        setProfilePicData(data);
       } catch (error) {
-        console.error('Error fetching patient:', error.message);
-        setErrorMessage('Failed to fetch patient');
+        console.error(error);
       }
     };
+
     fetchPatient();
-  }, [patientId]);
+  }, []);
+
+  const setProfilePicData = (data) => {
+    if (data.profilePic) {
+      console.log("Profile picture data:", data.profilePic); // Log profile picture data
+      console.log("Type of profilePic.data:", typeof data.profilePic.data); // Log the type of profilePic.data
+
+      if (typeof data.profilePic.data === 'string') {
+        const base64Image = `data:${data.profilePic.contentType};base64,${data.profilePic.data}`;
+        console.log("Base64 image string (string):", base64Image); // Log the base64 string
+        setProfilePic(base64Image);
+      } else if (data.profilePic.data instanceof ArrayBuffer) {
+        const base64Image = `data:${data.profilePic.contentType};base64,${arrayBufferToBase64(data.profilePic.data)}`;
+        console.log("Base64 image string (buffer):", base64Image); // Log the base64 string
+        setProfilePic(base64Image);
+      } else {
+        console.error("Unknown type of profilePic.data:", data.profilePic.data);
+      }
+    }
+  };
+
+  const arrayBufferToBase64 = (buffer) => {
+    console.log("Buffer data:", buffer); // Log the buffer data
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    console.log('hoo', bytes)
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    console.log('hi', binary)
+    return window.btoa(binary);
+  };
 
   return (
     <div>
-      {errorMessage ? (
-        <div>{errorMessage}</div>
-      ) : patient ? (
+      <h1>Patient Profile</h1>
+      {patient ? (
         <div>
-          <h2>Patient Information</h2>
-          <p>User ID: {patient.userId}</p>
-          <p>Username: {patient.username}</p>
-          <p>Password: {patient.password}</p>
-          <p>Email: {patient.email}</p>
-          <p>Name: {patient.name}</p>
-          <p>Date of Birth: {patient.dateOfBirth}</p>
-          <p>Phone Number: {patient.phoneNumber}</p>
-          <p>Registration Date: {patient.registrationDate}</p>
-          <p>Profile Picture: {patient.profilePic}</p>
-          <p>Patient ID: {patient.patientId}</p>
-          {/* Add more fields as needed */}
+          <div>
+            <label>Username:</label>
+            <p>{patient.username}</p>
+          </div>
+          <div>
+            <label>Email:</label>
+            <p>{patient.email}</p>
+          </div>
+          <div>
+            <label>Name:</label>
+            <p>{patient.name}</p>
+          </div>
+          <div>
+            <label>Date of Birth:</label>
+            <p>{new Date(patient.dateOfBirth).toLocaleDateString()}</p>
+          </div>
+          <div>
+            <label>Phone Number:</label>
+            <p>{patient.phoneNumber}</p>
+          </div>
+          <div>
+            <label>Profile Picture:</label>
+            {profilePic ? (
+              <img src={profilePic} alt="Profile" width="100" />
+            ) : (
+              <p>No profile picture available</p>
+            )}
+          </div>
         </div>
       ) : (
-        <div>Loading...</div>
+        <p>Loading...</p>
       )}
     </div>
   );

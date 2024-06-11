@@ -2,19 +2,25 @@ import React, { useEffect, useState } from 'react';
 import {FaVideo, FaComment} from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import ClipLoader from "react-spinners/ClipLoader";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
 
-const OnlineAppointmentsPage = () => {
+const OnlineAppointmentsPage = ({accessToken}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [appointments, setAppointments] = useState([]);
     const [videoSessions, setVideoSessions] = useState([]);
     const [textSessions, setTextSessions] = useState([]);
+    let textSessionData = [];
+    let videoSessionData = [];
     const [errorMessages, setErrorMessages] = useState('');
     const [sessionMode, setSessionMode] = useState('one-on-one');
     const [sessionType, setSessionType] = useState('text-chat');
-    const yourAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VySWQiOiI3YmJmMDE4Mi1lY2YxLTQ5MmEtOGFhZS1jNjBhNGNjODliYTUiLCJyb2xlIjoiUGF0aWVudCJ9LCJpYXQiOjE3MTc3ODc1NTcsImV4cCI6MTcxNzg3Mzk1N30.bSCruqGayYNDOoQYSQh8eqqN6x99LQmZUDdZyKQxft8"
+    let responseData;
+  
+    
 
     const navigate = useNavigate();
-    let baseUrl = `http://localhost:3500/bookings/sessionMode`
+    let baseUrl = `http://localhost:3500`
 
     useEffect(() => {
       fetchAppointments();
@@ -23,110 +29,257 @@ const OnlineAppointmentsPage = () => {
     }, [sessionType, sessionMode]);
     
     const fetchAppointments = async () => {
-        try {
-            setAppointments([]);
-            setIsLoading(true);
-            let url = `${baseUrl}/${sessionMode}/sessionType/${sessionType}`;
-            
-            const requestOptions = {
+      try {
+          setAppointments([]);
+          setIsLoading(true);
+  
+          let url = `${baseUrl}/bookings/sessionMode/${sessionMode}/sessionType/${sessionType}`;
+          
+          const requestOptions = {
               method: 'GET',
               headers: {
-                  'Authorization': `Bearer ${yourAuthToken}`, // Replace yourAuthToken with your actual token
+                  'Authorization': `Bearer ${accessToken}`,
                   'Content-Type': 'application/json'
               }
           };
-          
-            const response = await fetch(url, requestOptions);
-              
-            if(response.ok) {
+  
+          const response = await fetch(url, requestOptions);
+  
+          if(response.ok) {
               const data = await response.json();
               setAppointments(data);
-            } else if (response.status === 204) {
-                // Handle the case when no appointments are found
-                setAppointments([]);
-            } else if (response.status === 400){
-              errorMessages = await response.json();
+          } else if (response.status === 204) {
+              setAppointments([]);
+          } else if (response.status === 400) {
+              const errorMessages = await response.json();
               setErrorMessages(errorMessages);
-            } else {
-              errorMessages = await response.json();
+          } else {
+              const errorMessages = await response.json();
               setErrorMessages(errorMessages);
-            }
-            console.log(appointments)
-        } catch (error) {
+          }
+      } catch (error) {
           setErrorMessages('Failed to fetch appointments');
-        } finally {
-          setIsLoading(false)
-        }
+      } finally {
+          setIsLoading(false);
+      }
+  };
+  
 
-    };
-
-    const fetchTextSessions = async (sessionMode) => {
+    const fetchTextSessions = async (sessionModes) => {
       try {
         let url;
-        const mode = (sessionMode == 'one-on-one')? 'sessions' : 'groupSessions'
+        const mode = sessionModes === 'one-on-one' ? 'sessions' : 'groupSessions';
           
         setTextSessions([]);
-        url = `${baseUrl}/${mode}/text-sessions`;
-
+        url = `${baseUrl}/${mode}/sessionType/text-sessions`;
+    
         const requestOptions = {
           method: 'GET',
           headers: {
-              'Authorization': `Bearer ${yourAuthToken}`, // Replace yourAuthToken with your actual token
+              'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
           }
-      };
-      
+        };
+    
         const response = await fetch(url, requestOptions);
           
-        if(response.ok) {
+        if (response.ok) {
           const data = await response.json();
           setTextSessions(data);
+          console.log('Text sessions:', data);
+          return data; // Return the fetched data
         } else if (response.status === 204) {
-            // Handle the case when no appointments are found
-            setTextSessions([]);
-        } else{
-          errorMessages = await response.json();
+          setTextSessions([]);
+          console.log('No text sessions found');
+          return []; // Return an empty array if no sessions are found
+        } else {
+          const errorMessages = await response.json();
           setErrorMessages(errorMessages);
+          console.log('Error fetching text sessions:', errorMessages);
+          return []; // Return an empty array in case of an error
         } 
-      } catch {
-        setErrorMessages('Failed to fetch session');
+      } catch (error) {
+        setErrorMessages('Failed to fetch text sessions');
+        console.log('Error fetching text sessions:', error);
+        return []; // Return an empty array in case of an error
       }
-    }
-
-    const fetchVideoSessions = async () => {
-      try {
-        setVideoSessions([]);
-      } catch {
-
-      }
-    }
-
-
-
-    const createTextSession = async (appointment) =>{
-      fetchTextSessions(appointment.sessionMode);
-      textSessions.forEach(session => {
+    };
+    
+    const createTextSession = async (appointment) => {
+      const mode = sessionMode === 'one-on-one' ? 'sessions' : 'groupSessions';
+      const textSessionData = await fetchTextSessions(appointment.sessionMode);
+    
+      for (const session of textSessionData) {
         const appointmentPatientIds = appointment.patientInfo.map(patient => patient.id).sort();
         const sessionPatientIds = session.patientInfo.map(patient => patient.id).sort();
-  
+    
         if (
           session.therapistId === appointment.therapistId &&
           JSON.stringify(appointmentPatientIds) === JSON.stringify(sessionPatientIds)
         ) {
-          // Perform your desired action if a match is found
           console.log('Match found:', session);
-          navigate(`/room/text/${session.id}`);
-        } else {
-          const response = fetch(`${baseUrl}/${mode}`)
+          navigate(`/room/text/${session.sessionId}`);
+          return; // Exit the function once a match is found
         }
-      });
-
-    }
+      }
+    
+      // If no match is found, create a new session
+      if (textSessionData.length === 0) {
+        try {
+          const response = await fetch(`${baseUrl}/${mode}/sessionType/text-sessions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              patientInfo: appointment.patientInfo,
+              therapistId: appointment.therapistId,
+              sessionStartTime: new Date()
+            }),
+          });
+    
+          const data = await response.json();
+          const roomId = data.therapySession || data.groupSession;
+          navigate(`/room/text/${roomId._sessionId}`);
+        } catch (error) {
+          setErrorMessages('Failed to create text session');
+          console.log('Error creating text session:', error);
+        }
+      }
+    };
+    
   
-    const createVideoSession = (appointment) =>{
-  
+    const fetchVideoSessions = async (sessionModes) => {
+      try {
+        let url;
+        const mode = sessionModes === 'one-on-one' ? 'sessions' : 'groupSessions';
+          
+        setVideoSessions([]);
+        url = `${baseUrl}/${mode}/sessionType/video-sessions`;
+    
+        const requestOptions = {
+          method: 'GET',
+          headers: {
+              'Authorization': `Bearer ${accessToken}`, // Replace yourAuthToken with your actual token
+              'Content-Type': 'application/json'
+          }
+        };
+        
+        const response = await fetch(url, requestOptions);
+          
+        if(response.ok) {
+          const data = await response.json();
+          setVideoSessions(data);
+          return data;
+        } else if (response.status === 204) {
+          setVideoSessions([]);
+          console.log('No video sessions found');
+          return [];
+        } else{
+          const errorMessages = await response.json();
+          setErrorMessages(errorMessages);
+          console.log('Error fetching video sessions:', errorMessages);
+          return [];
+        } 
+      } catch (error) {
+        setErrorMessages('Failed to fetch video sessions');
+        console.log('Error fetching video sessions:', error);
+        return [];
+      }
+    }
+    
+    const createVideoSession = async (appointment) => {
+      const mode = sessionMode === 'one-on-one' ? 'sessions' : 'groupSessions';
+      const videoSessionData = await fetchVideoSessions(appointment.sessionMode);
+      console.log(videoSessionData)
+      
+      for (const session of videoSessionData) {
+        const appointmentPatientIds = appointment.patientInfo.map(patient => patient.id).sort();
+        const sessionPatientIds = session.patientInfo.map(patient => patient.id).sort();
+    
+        if (
+          session.therapistId === appointment.therapistId &&
+          JSON.stringify(appointmentPatientIds) === JSON.stringify(sessionPatientIds) && 
+          session.sessionEndTime == null
+        ) {
+          console.log('Match found:', session);      
+          navigate(`/room/video/${session.sessionId}`);
+          return;
+        }
+      }
+    
+      try {
+        const response = await fetch(`${baseUrl}/${mode}/sessionType/video-sessions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify(
+            {
+              patientInfo: appointment.patientInfo,
+              therapistId: appointment.therapistId,
+              sessionStartTime: new Date()
+            }
+          ),
+        });
+    
+        const data = await response.json();
+        let roomId = data.therapySession || data.groupSession;
+        navigate(`/room/video/${roomId._sessionId}`);
+      } catch (error) {
+        setErrorMessages('Failed to create video session');
+        console.log('Error creating video session:', error);
+      }
     }
 
+    const handleCancelation = async (bookingId) => {
+      try {
+          const url = `${baseUrl}/bookings/${bookingId}/cancel`;
+  
+          const response = await fetch(url, {
+              method: 'PUT',
+              headers: {
+                  'Authorization': `Bearer ${accessToken}`,
+                  'Content-Type': 'application/json'
+              },
+          });
+      
+          if (response.ok) {
+              responseData = await response.json();
+              toast(responseData.message, {
+                  position: "top-right",
+                  autoClose: 3000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+              });
+              window.location.reload();
+          }
+      } catch (error) {
+          toast(responseData.message, {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+          });
+      }
+  }
+
+  const isPastAppointment = (appointmentDate) => {
+      const now = new Date();
+      const appointment = new Date(appointmentDate);
+      return appointment < now;
+  };
+    
 
   const handleSessionTypeChange = (sessionType) => {
     setSessionType(sessionType);
@@ -138,6 +291,7 @@ const OnlineAppointmentsPage = () => {
 
   return (
     <div id='onlineAppointmentPage'>
+      <ToastContainer />
       <h1>Appointments</h1>
       <div id='onlineAppointmentPageContainer'>
       <div className="button-group">
@@ -176,7 +330,8 @@ const OnlineAppointmentsPage = () => {
         ) : (
             <div className="appointments-container"> 
               {appointments.map((appointment) => (
-                <div key={appointment.bookingId} className="appointment-box">          
+                <div key={appointment.bookingId} className={`appointment-box ${appointment.isCanceled ? 'canceled' : ''} ${isPastAppointment(appointment.date) ? 'passed' : ''}`}>  
+                  {appointment.sessionMode == 'group' && <p className='title-info'><span>Title:</span> {appointment.sessionTitle}</p>  }      
                   <p className='therapist-info'><span>Therapist:</span> {appointment.therapistName}</p>
                     { appointment.patientInfo.map((patientInfo, index) => (
                         <div className='patient-info' key={patientInfo.id || index}>
@@ -189,18 +344,19 @@ const OnlineAppointmentsPage = () => {
                   <p className='time-info'><span>Time:</span> {appointment.timeSlot}</p>
                   <p className='sessionType-info'><span>TherapistSession Type:</span> {appointment.sessionType}</p>
                   <p className='sessionMode-info'><span>TherapistSession Mode:</span> {appointment.sessionMode}</p>
-                  {appointment.isCanceled && 
-                  <div>
-                    <p>Canceled</p>
-                    <p>Canceled by {appointment.canceledBy}</p>
-                  </div>} 
-                  <div className='buttons'>           
-                    <div className='session-buttons'>
-                      <button onClick={ () => createTextSession(appointment) } ><FaComment /></button>
-                      <button onClick={ () => createVideoSession(appointment) } ><FaVideo /></button>
-                    </div>
-                  </div>
-                    <button id='cancel-appointment-btn'>Cancel Appointment</button>
+                  {appointment.isCanceled &&
+                      <div className='cancellation-info'>
+                          <p>Canceled</p>
+                          <p>Canceled by {appointment.canceledBy}</p>
+                      </div>}
+                  {!appointment.isCanceled &&
+                  <><div className='buttons'>
+                      <div className='session-buttons'>
+                        <button onClick={() => createTextSession(appointment)}><FaComment /></button>
+                        <button onClick={() => createVideoSession(appointment)}><FaVideo /></button>
+                      </div>
+                    </div><button id='cancel-appointment-btn' onClick={() => handleCancelation(appointment.bookingId)}>Cancel Appointment</button></>}
+                  {isPastAppointment(appointment.date) && <div className='status-label'>Passed</div>}
                     
                   </div>
               ))}

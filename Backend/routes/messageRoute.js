@@ -7,8 +7,12 @@ const messageRouter = (db) => {
     const messageController = new MessageController(db);
 
     router.route('/')
-        .get(messageController.getMessages)
-        .post(messageController.createMessage)
+    .post(messageController.createMessage)
+        
+        
+    router.route('/session/:sessionId')
+    .get(messageController.getMessages)
+        
     router.route('/:id')
         .get(messageController.getMessageById)
         .put(messageController.updateMessage)

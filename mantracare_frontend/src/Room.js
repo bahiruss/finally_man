@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Peer from 'peerjs';
 import Video from './Video';
 import { FaVideo, FaPhone, FaMicrophone, FaMicrophoneSlash, FaVideoSlash } from 'react-icons/fa';
-import { useParams } from 'react-router-dom';
-
+import { useParams, useNavigate } from 'react-router-dom';
 
 const myPeer = new Peer(undefined, {
   host: '/',
@@ -13,7 +12,8 @@ const myPeer = new Peer(undefined, {
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:numb.viagenie.ca' },
       { urls: 'stun:stun.services.mozilla.com' }
-    ]}
+    ]
+  }
 });
 
 async function getUserMedia() {
@@ -26,12 +26,13 @@ async function getUserMedia() {
   }
 }
 
-const Room = ({socket}) => {
-  const roomId = useParams();
+const Room = ({ socket }) => {
+  const { roomId } = useParams();
+  const navigate = useNavigate();
   const [peers, setPeers] = useState({});
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
-  
+
   const videoGridRef = useRef(null);
   const myVideoRef = useRef(null);
 
@@ -39,9 +40,8 @@ const Room = ({socket}) => {
     const videoGrid = videoGridRef.current;
     const myVideo = myVideoRef.current;
     let myStream;
-    
 
-    (async () => {
+    const initializePeer = async () => {
       try {
         myStream = await getUserMedia();
         addVideoStream(myVideo, myStream);
@@ -60,7 +60,6 @@ const Room = ({socket}) => {
               [call.peer]: { call, stream: userVideoStream, ref: videoRef },
             }));
           });
-
         });
 
         socket.on('user-connected', (userId) => {
@@ -70,44 +69,38 @@ const Room = ({socket}) => {
       } catch (error) {
         console.error('Error accessing user media:', error);
       }
-    })();
+    };
+
+    initializePeer();
 
     socket.on('user-disconnected', (userId) => {
-      console.log(`User disconnected: ${userId}`); // Add logging
       setPeers((prevPeers) => {
-        // Create a copy of previous peers
         const updatedPeers = { ...prevPeers };
-        // Check if the disconnected user exists in peers state
         if (updatedPeers[userId]) {
-          // Close the call and remove the user from peers
           updatedPeers[userId].call.close();
           delete updatedPeers[userId];
         }
         return updatedPeers;
-         // Emit an event to the server when a user disconnects to
-         socket.emit('check-last-user', roomId);
       });
     });
 
     myPeer.on('open', (id) => {
-      console.log(`Peer opened with ID: ${id}`); // Add logging
-      socket.emit('join-video-room', roomId.roomId, id);
+      console.log(`Peer opened with ID: ${id}`);
+      socket.emit('join-video-room', roomId, id);
     });
 
     return () => {
       myStream?.getTracks().forEach((track) => {
         track.stop();
       });
+      myPeer.destroy();
     };
-  }, [roomId, socket]); // Empty dependency array for initial mount only
+  }, [roomId, socket]);
 
   function connectToNewUser(userId, stream) {
     console.log(`Connecting to new user: ${userId}`);
     const call = myPeer.call(userId, stream);
-  
-    // Add more logging if needed to debug call setup
-    console.log(`Call object created:`, call);
-  
+
     call.on('stream', (userVideoStream) => {
       console.log(`Received stream from user ${userId}`);
       setPeers((prevPeers) => ({
@@ -115,7 +108,7 @@ const Room = ({socket}) => {
         [userId]: { call, stream: userVideoStream },
       }));
     });
-  
+
     call.on('close', () => {
       console.log(`Call closed by user ${userId}`);
       setPeers((prevPeers) => {
@@ -125,7 +118,7 @@ const Room = ({socket}) => {
       });
     });
   }
-  
+
   function toggleVideo() {
     setVideoEnabled((prevEnabled) => !prevEnabled);
     const myVideoTrack = myVideoRef.current.srcObject.getVideoTracks()[0];
@@ -145,6 +138,12 @@ const Room = ({socket}) => {
     }
   }
 
+  function handleDisconnect() {
+    myPeer.destroy();
+    socket.emit('leave-room', roomId); // Emit a custom event to handle disconnection
+    navigate('/'); // Redirect the user to the home page or another appropriate page
+  }
+
   return (
     <div className="App">
       <div ref={videoGridRef} id="video-container">
@@ -154,16 +153,16 @@ const Room = ({socket}) => {
         ))}
       </div>
       <div id='stream-control'>
-        <button className='stream-control-button' onClick={toggleVideo}  style={{ backgroundColor: videoEnabled ? 'green' : 'red' }}>
+        <button className='stream-control-button' onClick={toggleVideo} style={{ backgroundColor: videoEnabled ? 'green' : 'red' }}>
           {videoEnabled ? <FaVideo /> : <FaVideoSlash />}
         </button>
-        <button className='stream-control-button'  onClick={toggleAudio} style={{ backgroundColor: audioEnabled ? 'green' : 'red' }}>
+        <button className='stream-control-button' onClick={toggleAudio} style={{ backgroundColor: audioEnabled ? 'green' : 'red' }}>
           {audioEnabled ? <FaMicrophone /> : <FaMicrophoneSlash />}
         </button>
-        <button className='stream-control-button' ><FaPhone /></button>
+        <button className='stream-control-button' onClick={handleDisconnect}><FaPhone /></button>
       </div>
     </div>
   );
-}
+};
 
-export default Room
+export default Room;

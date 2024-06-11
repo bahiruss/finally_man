@@ -8,7 +8,10 @@ const verifyJWT = (req, res, next) => {
         token,
         process.env.ACCESS_TOKEN_SECRET,
         (err, decoded) => {
-            if (err) return res.sendStatus(403); // invalid token forbidden
+            if (err){ 
+                return res.sendStatus(403);
+                
+            }// invalid token forbidden
             req.body.userId = decoded.UserInfo.userId;
             next()
         }

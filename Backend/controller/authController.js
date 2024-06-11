@@ -43,7 +43,9 @@ class AuthController {
                 foundUser = await patientCollection.findOne({ _email: loginData.email });
                 if (!foundUser) {
                     foundUser = await therapistCollection.findOne({ _email: loginData.email });
-                    if(foundUser._approved == false) return res.status(401).json({ message: 'U have not been authorized'})
+                    if(foundUser){
+                        if(foundUser._approved == false) return res.status(401).json({ message: 'U have not been authorized'})
+                    }     
                 }
                 if (!foundUser) {
                     foundUser = await administratorCollection.findOne({ _email: loginData.email });
@@ -84,7 +86,7 @@ class AuthController {
                     process.env.ACCESS_TOKEN_SECRET,
                     { expiresIn: '1d'}
                 );
-                res.json({ accessToken: accessToken, role: role });
+                res.json({ accessToken: accessToken, role: role, username: foundUser._username });
             } else {
                 return res.status(401).json({ message: 'incorrect password'});
             }

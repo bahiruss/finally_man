@@ -18,7 +18,7 @@ import RenderTherapistSignupStep from './RenderTherapistSignupStep';
 // import { navigate } from '@reach/router';
 
 
-const Signup_Login_Form = ({accessToken, userRole}) => {
+const Signup_Login_Form = ({setUserName, setAccessToken, accessToken, setUserRole}) => {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [isForgotPassMode, setIsForgotPassMode] = useState(false);
   const [isEmailverified, setIsEmailverified] = useState(false);
@@ -73,7 +73,7 @@ const Signup_Login_Form = ({accessToken, userRole}) => {
         const responseData = await response.json();
         toast(responseData.message, {
             position: "top-right",
-            autoClose: 1200,
+            autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
@@ -127,7 +127,7 @@ const handleTherapistRegistration = async (e) => {
       const responseData = await response.json();
       toast(responseData.message, {
           position: "top-right",
-          autoClose: 1200,
+          autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -169,15 +169,17 @@ const handleTherapistRegistration = async (e) => {
       const responseData = await response.json();
       
       if(response.ok){
-        userRole = responseData.role;
-        accessToken = responseData.accessToken;
+        setUserRole(responseData.role);
+        setAccessToken(responseData.accessToken);
+        setUserName(responseData.username);
+        console.log(responseData.username)
+        navigate('/appointments');
       }
 
       console.log(accessToken)
-      navigate('/');
       toast(responseData.message, {
         position: "top-right",
-        autoClose: 1200,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -252,7 +254,7 @@ const handleTherapistRegistration = async (e) => {
       });
       toast(response.data.message, {
         position: "top-right",
-        autoClose: 1200,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -281,7 +283,7 @@ const handleTherapistRegistration = async (e) => {
       });
       toast(response.data.message, {
         position: "top-right",
-        autoClose: 1200,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,

@@ -1,4 +1,5 @@
 const GroupSession = require('../model/GroupSession');
+const { v4: uuidv4 } = require('uuid');
 class GroupSessionController {
     constructor (db) {
         this.db = db;
@@ -36,7 +37,7 @@ class GroupSessionController {
 
             //if a patient requests the api endpoint
             if(patient){
-                const videoSessions = await groupSessionsCollection.find({ _patientId: patient._patientId, _sessionType: 'video-chat'}, {
+                const videoSessions = await groupSessionsCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: 'video-chat'}, {
                     projection: {
                         _id: 0,
                         sessionId: "$_sessionId",
@@ -91,7 +92,7 @@ class GroupSessionController {
 
             //if a patient requests the api endpoint
             if(patient){
-                const chatSessions = await groupSessionsCollection.find({ _patientId: patient._patientId, _sessionType: 'text-chat'}, {
+                const chatSessions = await groupSessionsCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: 'text-chat'}, {
                     projection: {
                         _id: 0,
                         sessionId: "$_sessionId",
@@ -169,6 +170,7 @@ class GroupSessionController {
             groupSession.sessionTitle = groupSessionData.sessionTitle;
             groupSession.sessionType = 'video-chat';
             groupSession.sessionStartTime = groupSessionData.sessionStartTime;
+            groupSession.sessionEndTime = null;
 
             await groupSessionsCollection.insertOne(groupSession);
 
@@ -200,6 +202,7 @@ class GroupSessionController {
             groupSession.sessionTitle = groupSessionData.sessionTitle;
             groupSession.sessionType = 'text-chat';
             groupSession.sessionStartTime = groupSessionData.sessionStartTime;
+            console.log(groupSession)
 
             await groupSessionsCollection.insertOne(groupSession);
 

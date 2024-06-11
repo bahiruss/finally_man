@@ -9,11 +9,11 @@ const groupSessionRouter = (db) => {
     router.route('/:id')
         .get(groupSessionController.getSessionById)
 
-    router.route('/text-sessions')
+    router.route('/sessionType/text-sessions')
         .post(groupSessionController.createTextSession)
         .get(groupSessionController.getTextSessions)
 
-    router.route('/video-sessions')
+    router.route('/sessionType/video-sessions')
         .post(groupSessionController.createVideoSessions)
         .get(groupSessionController.getVideoSessions)
 

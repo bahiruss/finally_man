@@ -38,7 +38,7 @@ class TherapySessionController {
 
             //if a patient requests the api endpoint
             if(patient){
-                const videoSessions = await therapySessionsCollection.find({ _patientId: patient._patientId, _sessionType: 'video-chat'}, {
+                const videoSessions = await therapySessionsCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: 'video-chat'}, {
                     projection: {
                         _id: 0,
                         sessionId: "$_sessionId",
@@ -64,13 +64,16 @@ class TherapySessionController {
     getTextSessions = async (req, res) => {
         try{
             const userId  = req.body.userId;
-
+            console.log(req.body)
             const patientCollection = await this.db.getDB().collection('patients');
             const therapistCollection = await this.db.getDB().collection('therapists');
             const therapySessionsCollection = await this.db.getDB().collection('therapysessions');
 
             const therapist = await therapistCollection.findOne({_userId : userId });
             const patient = await patientCollection.findOne({_userId : userId });
+            console.log(therapist, patient)
+     
+            
 
             // if therapist requests the api end point
             if(therapist){
@@ -93,7 +96,8 @@ class TherapySessionController {
 
             //if a patient requests the api endpoint
             if(patient){
-                const chatSessions = await therapySessionsCollection.find({ _patientId: patient._patientId, _sessionType: 'text-chat'}, {
+                console.log('hi')
+                const chatSessions = await therapySessionsCollection.find({ '_patientInfo.id': patient._patientId, _sessionType: 'text-chat'}, {
                     projection: {
                         _id: 0,
                         sessionId: "$_sessionId",
@@ -107,6 +111,7 @@ class TherapySessionController {
                     }
                 }).toArray();
                 if (!chatSessions.length) return res.status(204).json({ 'message': 'No chatSessions found' });
+                console.log(chatSessions)
                 res.json(chatSessions);
             }
             
@@ -169,6 +174,8 @@ class TherapySessionController {
             therapySession.therapistName = therapist._name;
             therapySession.sessionType = 'video-chat';
             therapySession.sessionStartTime = therapySessionData.sessionStartTime;
+            therapySession.sessionEndTime = null;
+            
 
             await therapySessionsCollection.insertOne(therapySession);
 
@@ -189,6 +196,7 @@ class TherapySessionController {
 
     
             const therapist = await therapistCollection.findOne({_therapistId: therapySessionData.therapistId});
+            
 
             //create an model object
             const therapySession = new TherapySession();

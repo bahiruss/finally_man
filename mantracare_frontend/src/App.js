@@ -1,24 +1,61 @@
+// import React from 'react';
+// import PatientProfile from './profilePages/patientProfile';
+
+// const App = () => {
+//   const patientId = 'some-patient-id'; // Replace with actual patient ID
+
+//   return (
+//     <div>
+//       <PatientProfile patientId={patientId} />
+//     </div>
+//   );
+// };
+
+// export default App;
 
 
 import './App.css';
 import { io } from 'socket.io-client';
 import {  BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-
+import Signup_Login_Form from './components/Signup_Login_Form/Signup_Login_Form'
 import Room from './Room';
-import TextChat from './TextChat';
+import TextChat from './TextChat/TextChat';
 import OnlineAppointmentsPage from './appointment/OnlineAppointmentPage';
+import { useState, useEffect } from 'react';
+import InPersonAppointmentPage from './appointment/InPersonAppointmentPage';
+import TextSessionPage from './SessionPage/TextSessionPage';
+import VideoSessionPage from './SessionPage/VideoSessionPage';
 
 const socket = io('http://localhost:3500');
 
 function App() {
-  const userId = 'c7cb7dc6-0a8b-48f9-bac6-2c1ec1e7ee55';
+  const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || '');
+  const [userRole, setUserRole] = useState(localStorage.getItem('roles') || '');
+  const [username, setUserName] = useState(localStorage.getItem('username') || '');
+
+  useEffect(() => {
+    // Save accessToken to localStorage when it changes
+    localStorage.setItem('accessToken', accessToken);
+  }, [accessToken]);
+  useEffect(() => {
+    // Save accessToken to localStorage when it changes
+    localStorage.setItem('username', username);
+  }, [username]);
+  useEffect(() => {
+    // Save accessToken to localStorage when it changes
+    localStorage.setItem('roles', userRole);
+  }, [username]);
   
  return(
   <Router>
     <Routes>
-      <Route path='/room/video/:roomId' element= {<Room  socket={socket}/>} />
-      <Route path='/room/text/:roomId' element= {<TextChat  socket={socket}/>} />
-      <Route path='/appointments' element= {<OnlineAppointmentsPage/>} />
+      <Route path='/' element= {<Signup_Login_Form setUserName={setUserName} accessToken={accessToken} setAccessToken={setAccessToken} setUserRole={setUserRole}/>} />
+      <Route path='/room/video/:roomId' element= {<Room  accessToken={accessToken} socket={socket}/>} />
+      <Route path='/room/text/:roomId' element= {<TextChat  userRole={userRole} username={username} accessToken={accessToken} socket={socket}/>} />
+      <Route path='/appointments/online'  element= {<OnlineAppointmentsPage accessToken={accessToken}/>} />
+      <Route path='/appointments/in-person'  element= {<InPersonAppointmentPage accessToken={accessToken}/>} />
+      <Route path='/sessions/text'  element= {<TextSessionPage accessToken={accessToken}/>} />
+      <Route path='/sessions/video'  element= {<VideoSessionPage accessToken={accessToken}/>} />
     </Routes>
   </Router>
    )
