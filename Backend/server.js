@@ -23,6 +23,8 @@ const groupSessionRouter = require('./routes/groupSessionRoute');
 const feedbackRouter = require('./routes/feedbackAndRatingRoute');
 const authRouter = require('./routes/authRoute');
 const messageRouter = require('./routes/messageRoute');
+const sessionNoteRouter = require('./routes/sessionNoteRoute');
+const resourceRouter = require('./routes/resourceRoute')
 
 const PORT = process.env.PORT || 3500;
 
@@ -69,6 +71,8 @@ app.use('/messages', messageRouter(db))
 app.use('/sessions', therapySessionRouter(db));
 app.use('/groupSessions', groupSessionRouter(db));
 app.use('/feedbackAndRating', feedbackRouter(db));
+app.use('/notes', sessionNoteRouter(db));
+app.use('/resources', resourceRouter(db));
 
 const usersInRooms = {};
 

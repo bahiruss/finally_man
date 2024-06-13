@@ -395,7 +395,7 @@ const TextChat = ({ socket, accessToken, username, userRole }) => {
 
   return (
     <div className='text-page-container'>
-      {isTherapistLoading || isMessagesLoading || isNoteLoading? (
+      {isTherapistLoading || isMessagesLoading ?(
         <div className="loader-container">
         <ClipLoader color={'#0426FA'} loading={true} size={100} aria-label="Loading Spinner" />
         </div>
@@ -416,14 +416,14 @@ const TextChat = ({ socket, accessToken, username, userRole }) => {
                 <p><span>Rating:</span> <span>{therapists[0].rating}</span></p>
               </div>
             )}
-          </div>) : <Note accessToken={accessToken} userRole={userRole} isNoteLoading={isNoteLoading} setNoteIsLoading={setNoteIsLoading}/>}
+          </div>) : <Note  accessToken={accessToken} />}
           <div className="text-chat-container">
             <ToastContainer />
             <div className="text-chat-header">
             <div className='image-container'>
                 <img src={therapistProfile} alt="" />
             </div >
-            <div className='header-info'> <p>{therapists[0].name? `Dr. ${therapists[0].name}` : ''}</p>
+            <div className='header-info'> <p>Dr.{therapists[0].name}</p>
            { textSessions.title && <p>Title {textSessions.title}</p>}</div>
                  
             </div>

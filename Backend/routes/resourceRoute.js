@@ -9,19 +9,24 @@ const resourceRouter = (db) => {
     router.route('/')
         .get(resourceController.getResources)
         .post(resourceController.createResource)
+        
+    router.route('/search')
+        .get(resourceController.getResourceByTitleORAuthor);
     router.route('/:id')
         .get(resourceController.getResourceById)
         .put(resourceController.updateResource)
         .delete(resourceController.deleteResource)
         
-    router.route('/search')
-        .get(resourceController.getResourceByTitleORAuthor);
+    
+    
+    router.route('/therapist')
+        .get(resourceController.getResourceByTherapistId)
 
     router.route('/:id/comment')
         .post(resourceController.makeComment);
 
     router.route('/:id/like')
-        .post(resourceController.giveALike);
+        .put(resourceController.giveALike);
 
     return router
 }

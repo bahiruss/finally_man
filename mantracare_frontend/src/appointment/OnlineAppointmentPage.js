@@ -294,7 +294,7 @@ const OnlineAppointmentsPage = ({accessToken}) => {
       <ToastContainer />
       <h1>Appointments</h1>
       <div id='onlineAppointmentPageContainer'>
-      <div className="button-group">
+      <div className="appointment-button-group">
             <button
               className={sessionType === 'text-chat' ? 'selected' : ''}
               onClick={() => handleSessionTypeChange('text-chat')}
@@ -308,7 +308,7 @@ const OnlineAppointmentsPage = ({accessToken}) => {
               Video
             </button>
           </div>
-          <div className="button-group">
+          <div className="appointment-button-group">
             <button
               className={sessionMode === 'one-on-one' ? 'selected' : ''}
               onClick={() => handleSessionModeChange('one-on-one')}

@@ -144,12 +144,12 @@
     box-shadow: 1px 1px 1px 1px black inset; 
   }
 /* OnlineAppointmentsPage.css */
-.button-group {
+.appointment-button-group {
     display: flex;
     gap: 10px;
   }
   
-  .button-group button {
+  .appointment-button-group button {
     padding: 10px 20px;
     border: none;
     background: none;
@@ -159,7 +159,7 @@
     outline: none;
   }
   
-  .button-group button::after {
+  .appointment-button-group button::after {
     content: '';
     position: absolute;
     left: 0;
@@ -170,7 +170,7 @@
     transition: background-color 0.8s ease, width 0.8s ease;
   }
   
-  .button-group button.selected::after {
+  .appointment-button-group button.selected::after {
     background-color: blue;
     width: 100%;
   }
@@ -201,8 +201,8 @@
     background-color: gray;
 }
 
-  
-  /* .button-group button:hover::after {
+
+  /* .appointment-button-group button:hover::after {
     background-color: lightblue;
     width: 100%;
   } */

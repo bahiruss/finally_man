@@ -25,6 +25,9 @@ import { useState, useEffect } from 'react';
 import InPersonAppointmentPage from './appointment/InPersonAppointmentPage';
 import TextSessionPage from './SessionPage/TextSessionPage';
 import VideoSessionPage from './SessionPage/VideoSessionPage';
+import ResourcePage from './blog/ResourceList';
+import ResourceDetailPage from './blog/ResourceDetailPage';
+import CreateResource from './blog/CreateResourcePage';
 
 const socket = io('http://localhost:3500');
 
@@ -56,6 +59,9 @@ function App() {
       <Route path='/appointments/in-person'  element= {<InPersonAppointmentPage accessToken={accessToken}/>} />
       <Route path='/sessions/text'  element= {<TextSessionPage accessToken={accessToken}/>} />
       <Route path='/sessions/video'  element= {<VideoSessionPage accessToken={accessToken}/>} />
+      <Route path='/resources'  element= {<ResourcePage accessToken={accessToken}/>} />
+      <Route path='/resources/:id'  element= {<ResourceDetailPage accessToken={accessToken}/>} />
+      <Route path='/create/resources'  element= {<CreateResource accessToken={accessToken}/>} />
     </Routes>
   </Router>
    )

@@ -33,7 +33,6 @@ class MessageController {
             
             if(!messages.length) return res.status(204).json({ message: 'No messages found' });
             res.json(messages);
-            console.log(messages)
         
         } catch (error) {
             res.status(500).json({ message: 'Failed to fetch messages' });

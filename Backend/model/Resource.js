@@ -1,5 +1,5 @@
 class Resource {
-    constructor(resourceId, resourceTitle, resourceDescription, resourceCreatorId, resourceAuthor, resourceContent, resourceTimeStamp){
+    constructor(resourceId, resourceTitle, resourceDescription, resourceCreatorId, resourceAuthor, resourceContent, resourceTimeStamp, likes, likesBy, comments){
         this._resourceId = resourceId;
         this._resourceTitle = resourceTitle;
         this._resourceDescription = resourceDescription;
@@ -9,6 +9,7 @@ class Resource {
         this._resourceTimeStamp = resourceTimeStamp;
         this._likes = likes || 0;
         this._comments = comments || [];
+        this._likesBy = likesBy || [];
     }
 
     get resourceId() {
@@ -82,6 +83,14 @@ class Resource {
 
     set comments(value) {
         this._comments = value;
+    }
+
+    get likesBy() {
+        return this._likesBy;
+    }
+
+    set likesBy(value) {
+        this._likesBy = value;
     }
 }
 

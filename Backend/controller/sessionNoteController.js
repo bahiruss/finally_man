@@ -6,7 +6,7 @@ class SessionNoteController {
         this.db = db;
     }
 
-    async getNotes (req, res) {
+    getNotes = async (req, res) => {
         try{
             if (!req?.params?.sessionId) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
@@ -26,16 +26,18 @@ class SessionNoteController {
             }).toArray();
     
             if(!sessionNotes.length) return res.status(204).json({ message: 'No notes found' });
+            console.log('hi',sessionNotes)
 
             res.json(sessionNotes);
 
         } catch (error) {
             res.status(500).json({ message: 'Failed to fetch notes' });
+            console.log(error)
         }
        
     }
 
-    async getNoteById (req, res) {
+    getNoteById = async (req, res) =>{
         try{
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
@@ -64,14 +66,14 @@ class SessionNoteController {
     
     }
 
-    async createNote (req, res) {
+    createNote = async (req, res) => {
         try {
             const noteData = req.body;
 
             const sessionNoteCollection = await this.db.getDB().collection('notes');
 
             //check for missing fields  // decide whether the note taking will only be for therapist or patient
-            if( !noteData.sessionId || !noteData.creatorId || !noteData.note) {
+            if( !noteData.sessionId || !noteData.note) {
                 return res.status(400).json({ message: 'Missing required fields! '})
             }
 
@@ -85,6 +87,7 @@ class SessionNoteController {
 
             //insert in database
             await sessionNoteCollection.insertOne(sessionNote);
+            console.log(sessionNote)
             res.status(201).json({ message: 'Note created successfully', 'createdNote': sessionNote });
 
         } catch (error) {
@@ -92,7 +95,7 @@ class SessionNoteController {
         }
     }
 
-    async updateNote (req, res) {
+    updateNote = async (req, res) =>{
         try {
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
@@ -120,7 +123,7 @@ class SessionNoteController {
         }
     }
 
-    async deleteNote (req, res) {
+    deleteNote = async (req, res) => {
         try {
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });

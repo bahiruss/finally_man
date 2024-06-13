@@ -166,12 +166,12 @@
     font-size: 12px;
   }
 
-  input {
+  .text-chat-footer input {
     width: 100%;
     height: 100%
     
   }
-  button {
+  .text-chat-footer button {
     width: 10%;
     height:100%;
     border-radius: 10px;

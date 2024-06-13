@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { FaStickyNote } from 'react-icons/fa';
+import { FaStickyNote, FaTrash, FaEdit } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import ClipLoader from "react-spinners/ClipLoader";
+import './note.css';
+import { toast, ToastContainer } from 'react-toastify';
 
-const Note = ({ accessToken, username, isNoteLoading, setNoteIsLoading }) => {
+const Note = ({ accessToken }) => {
   const { roomId } = useParams();
   const [note, setNote] = useState('');
   const [noteList, setNoteList] = useState([]);
-  
+  const [editNoteId, setEditNoteId] = useState(null);
+  const [editNoteContent, setEditNoteContent] = useState('');
+  const [isnoteLoading, setNoteIsLoading] = useState(false);
+
   const baseUrl = `http://localhost:3500`;
 
   useEffect(() => {
     fetchNotes();
-  }, [roomId]);
+  }, [roomId, note]);
 
   const fetchNotes = async () => {
     try {
       setNoteIsLoading(true);
       const url = `${baseUrl}/notes/session/${roomId}`;
-      
+
       const requestOptions = {
         method: 'GET',
         headers: {
@@ -38,9 +41,9 @@ const Note = ({ accessToken, username, isNoteLoading, setNoteIsLoading }) => {
         // Do nothing if no notes are found
       } else {
         const errorMessages = await response.json();
-        toast.error(errorMessages.message || 'Failed to fetch notes', {
+        toast.error('Failed to fetch notes', {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -53,7 +56,7 @@ const Note = ({ accessToken, username, isNoteLoading, setNoteIsLoading }) => {
     } catch (error) {
       toast.error('Failed to fetch notes', {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -70,12 +73,8 @@ const Note = ({ accessToken, username, isNoteLoading, setNoteIsLoading }) => {
       const noteData = {
         sessionId: roomId,
         note,
-        creatorId: username,
         timeStamp: new Date(),
       };
-
-      setNote('');
-      setNoteList((prevNoteList) => [...prevNoteList, noteData]);
 
       try {
         const url = `${baseUrl}/notes`;
@@ -90,65 +89,144 @@ const Note = ({ accessToken, username, isNoteLoading, setNoteIsLoading }) => {
 
         const response = await fetch(url, requestOptions);
 
+
         if (response.status !== 201) {
           const errorMessages = await response.json();
-          toast.error(errorMessages.message || 'Failed to send note', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
+          
         }
       } catch (error) {
-        toast.error('Failed to send note', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+       
       }
+      setNoteList((prevNoteList) => [...prevNoteList, noteData]);
+      setNote('');
     }
   };
 
+  const updateNote = async (noteId, noteContent) => {
+    try {
+      const url = `${baseUrl}/notes/${noteId}`;
+      const requestOptions = {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ note: noteContent })
+      };
+
+      const response = await fetch(url, requestOptions);
+
+      if (response.status === 200) {
+        setNoteList((prevNoteList) =>
+          prevNoteList.map((note) =>
+            note.noteId === noteId ? { ...note, note: noteContent } : note
+          )
+        );
+        setEditNoteId(null);
+        setEditNoteContent('');
+        
+      } else {
+        const errorMessages = await response.json();
+        
+      }
+    } catch (error) {
+      
+    }
+  };
+
+  const deleteNote = async (noteId) => {
+    try {
+      const url = `${baseUrl}/notes/${noteId}`;
+      const requestOptions = {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      };
+
+      const response = await fetch(url, requestOptions);
+      console.log(response.status)
+      if (response.status === 200) {
+        // Remove the deleted note from the note list
+        setNoteList((prevNoteList) => prevNoteList.filter((note) => note.noteId !== noteId));
+        
+      } else {
+        const errorMessages = await response.json();
+        
+      }
+    } catch (error) {
+      
+    }
+  };
+
+
   return (
     <div className='note-container'>
-          <div className='note-body'>
-            {noteList.map((note, index) => (
-              <div className='note-item' key={index}>
-                <p>{note.note}</p>
+      <ToastContainer />
+
+      <div className='note-body'>
+        {noteList.map((note, index) => (
+          <div className='note-item' key={index}>
+          {editNoteId === note.noteId ? (
+            <>
+              <input
+                type='text'
+                value={editNoteContent}
+                onChange={(e) => setEditNoteContent(e.target.value)}
+              />
+              <button onClick={() => updateNote(note.noteId, editNoteContent)}>
+                Save
+              </button>
+              <button onClick={() => setEditNoteId(null)}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <div className='note-content'>{note.note}</div>
+              <div className='note-meta'>
                 <div className='note-date'>
-                  {new Date(note.timeStamp).toLocaleString()}
+                  {new Date(note.timeStamp).toLocaleDateString()}
+                </div>
+                <div className='note-time'>
+                  {new Date(note.timeStamp).toLocaleTimeString()}
                 </div>
               </div>
-            ))}
-          </div>
-          <div className='note-footer'>
-            <input
-              type="text"
-              value={note}
-              placeholder="Write a note..."
-              onChange={(e) => setNote(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  sendNote();
-                }
-              }}
-            />
-            <button onClick={sendNote}>
-              <FaStickyNote />
-            </button>
-          </div>
-      
+              <div className='note-actions'>
+                <button onClick={() => {
+                  setEditNoteId(note.noteId);
+                  setEditNoteContent(note.note);
+                }}>
+                  <FaEdit />
+                </button>
+                <button onClick={() => deleteNote(note.noteId)}>
+                  <FaTrash />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+        
+        ))}
+      </div>
+      <div className='note-footer'>
+        <input
+          type='text'
+          value={note}
+          placeholder='Write a note...'
+          onChange={(e) => setNote(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              sendNote();
+            }
+          }}
+        />
+        <button onClick={sendNote}>
+          <FaStickyNote />
+        </button>
+      </div>
     </div>
   );
 };
 
 export default Note;
+
