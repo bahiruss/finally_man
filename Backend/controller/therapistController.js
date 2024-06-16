@@ -101,6 +101,51 @@ class TherapistController {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
         }
     };
+
+    getTherapistByUserId = async (req, res) => {
+        try {
+            if (!req?.params?.id) {
+                return res.status(400).json({ 'message': 'ID parameter is required' });
+            }
+            const therapistCollection = await this.db.getDB().collection('therapists');
+            const therapist = await therapistCollection.findOne({ _userId: req.params.id, _approved: true }, {
+                projection: {
+                    _id: 0,
+                    userId: "$_userId",
+                    username: "$_username",
+                    password: "$_password",
+                    email: "$_email",
+                    name: "$_name",
+                    dateOfBirth: "$_dateOfBirth",
+                    phoneNumber: "$_phoneNumber",
+                    registrationDate: "$_registrationDate",
+                    profilePic: "$_profilePic",
+                    therapistId: "$_therapistId",
+                    role: "$_role",
+                    address: "$_address",
+                    specialization: "$_specialization",
+                    experience: "$_experience",
+                    education: "$_education",
+                    description: "$_description",
+                    approved: "$_approved"
+                },
+            });
+    
+            if (!therapist) {
+                return res.status(404).json({ 'message': 'Therapist not found or not approved' });
+            }
+    
+            const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
+            const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: therapist.therapistId }).toArray();
+            const totalRating = feedbacks.reduce((sum, rating) => sum + parseFloat(rating._rating), 0);
+            const averageRating = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+            const roundedRating = Math.round(averageRating * 100) / 100; // Rounding to two decimal places
+    
+            res.json({ ...therapist, rating: roundedRating });
+        } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch therapist' });
+        }
+    };
     
     getTherapistByName = async (req, res) => {
         try {

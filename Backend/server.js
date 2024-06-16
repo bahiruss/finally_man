@@ -24,7 +24,9 @@ const feedbackRouter = require('./routes/feedbackAndRatingRoute');
 const authRouter = require('./routes/authRoute');
 const messageRouter = require('./routes/messageRoute');
 const sessionNoteRouter = require('./routes/sessionNoteRoute');
-const resourceRouter = require('./routes/resourceRoute')
+const resourceRouter = require('./routes/resourceRoute');
+const forumRouter = require('./routes/forumRoute');
+const forumPostRouter = require('./routes/forumPostRoute');
 
 const PORT = process.env.PORT || 3500;
 
@@ -73,6 +75,8 @@ app.use('/groupSessions', groupSessionRouter(db));
 app.use('/feedbackAndRating', feedbackRouter(db));
 app.use('/notes', sessionNoteRouter(db));
 app.use('/resources', resourceRouter(db));
+app.use('/forums', forumRouter(db));
+app.use('/forumposts', forumPostRouter(db))
 
 const usersInRooms = {};
 

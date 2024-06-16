@@ -62,6 +62,7 @@ class ResourceController {
                     resourceContent: "$_resourceContent",
                     resourceTimeStamp: "$_resourceTimeStamp",
                     likes: "$_likes",
+                    likesBy: "$_likesBy",
                     comments: "$_comments"
                 }
             });
@@ -137,12 +138,18 @@ class ResourceController {
     
     getResourceByTherapistId = async (req, res) => {
         try {
+            let { page = 1, limit = 10 } = req.query; 
+    
+            page = parseInt(page);
+            limit = parseInt(limit)
+    
+            const startIndex = (page - 1) * limit;
             
             const therapistCollection = await this.db.getDB().collection('therapists');
             const resourceCollection = await this.db.getDB().collection('resources');
     
             // Find therapist by therapistId
-            const therapist = await therapistCollection.findOne({ _therapistId: req.body.userId });
+            const therapist = await therapistCollection.findOne({ _userId: req.body.userId });
     
             if (!therapist) {
                 return res.status(404).json({ message: 'Therapist not found' });
@@ -161,13 +168,15 @@ class ResourceController {
                     likes: "$_likes",
                     comments: "$_comments"
                 }
-            }).toArray();
+            }).skip(startIndex).limit(limit).toArray();
+
+            const totalCount = await resourceCollection.countDocuments();
     
             if (!resources.length) {
                 return res.status(204).json({ message: 'No resources found for this therapist' });
             }
             
-            res.json(resources);
+            res.json({ resources, totalCount });
             
         } catch (error) {
             res.status(500).json({ message: 'Failed to fetch resources by therapist ID' });
@@ -181,9 +190,11 @@ class ResourceController {
 
             const resourceCollection = await this.db.getDB().collection('resources');
             const therapistCollection = await this.db.getDB().collection('therapists');
+            console.log(resourceData.resourceContent) 
 
             //check for missing fields
             if(!resourceData.resourceTitle || !resourceData.resourceContent) {
+                console.log('hi')
                 return res.status(400).json({ message: 'Missing required fields! '});
             }
 
@@ -202,6 +213,7 @@ class ResourceController {
             resource.likes = 0;
 
             await resourceCollection.insertOne(resource);
+            console.log(resource)
             res.status(201).json({ message: 'resource created successfully', 'createdResource': resource });
 
         } catch (error) {
@@ -275,7 +287,7 @@ class ResourceController {
             }
             console.log(patient,' df', therapist)
 
-            const commentBy = patient ? patient._name : therapist._name
+            const commentBy = patient ? patient._username : therapist._username
     
             // Save the comment wyith the ID of the user who commented
             await resourceCollection.updateOne(
@@ -297,42 +309,73 @@ class ResourceController {
             if (!req?.params?.id) {
                 return res.status(400).json({ message: 'Resource ID is required' });
             }
-
-            const userId = req.body.userId; // Assuming you're using authentication middleware to get user details
-
-            const resourceCollection = await this.db.getDB().collection('resources');
-            const existingResource = await resourceCollection.findOne({ _resourceId: req.params.id });
-
+    
+            const userId = req.body.userId;
+    
+            if (!userId) {
+                return res.status(400).json({ message: 'User ID is required' });
+            }
+    
+            const db = this.db.getDB();
+            const resourceCollection = db.collection('resources');
+            const patientCollection = db.collection('patients');
+            const therapistCollection = db.collection('therapists');
+    
+            const [existingResource, patient, therapist] = await Promise.all([
+                resourceCollection.findOne({ _resourceId: req.params.id }),
+                patientCollection.findOne({ _userId: userId }),
+                therapistCollection.findOne({ _userId: userId })
+            ]);
+    
             if (!existingResource) {
                 return res.status(404).json({ message: 'Resource not found' });
             }
-
-            // Ensure likesBy is an array
+    
+            const username = patient ? patient._username : therapist ? therapist._username : null;
+    
+            if (!username) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+    
+            
             if (!Array.isArray(existingResource._likesBy)) {
                 existingResource._likesBy = [];
             }
-            console.log(existingResource._likesBy)
-
+    
+            let likeStatus;
+    
             // Check if user has already liked the resource
-            if (existingResource._likesBy.includes(userId)) {
-                return res.status(400).json({ message: 'User has already liked this resource' });
+            if (existingResource._likesBy.includes(username)) {
+                // Unlike the resource
+                await resourceCollection.updateOne(
+                    { _resourceId: req.params.id },
+                    {
+                        $inc: { _likes: -1 },
+                        $pull: { _likesBy: username }
+                    }
+                );
+                likeStatus = 'unliked';
+            } else {
+                // Like the resource
+              await resourceCollection.updateOne(
+                    { _resourceId: req.params.id },
+                    {
+                        $inc: { _likes: 1 },
+                        $push: { _likesBy: username }
+                    }
+                );
+                likeStatus = 'liked';
+               
             }
-
-            // Increase like count by one and add userId to likesBy
-            await resourceCollection.updateOne(
-                { _resourceId: req.params.id },
-                {
-                    $inc: { _likes: 1 },
-                    $push: { _likesBy: userId }
-                }
-            );
-
-            res.status(200).json({ message: 'Liked successfully' });
+    
+            res.status(200).json({ message: `${likeStatus} successfully`, likeStatus });
         } catch (error) {
-            res.status(500).json({ message: 'Failed to add like' });
+            res.status(500).json({ message: 'Failed to toggle like' });
             console.error(error);
         }
-    }
+    };
+    
+    
     
     
     deleteResource =  async (req, res) => {

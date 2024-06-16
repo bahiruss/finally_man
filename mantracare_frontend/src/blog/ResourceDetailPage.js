@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ClipLoader from "react-spinners/ClipLoader";
-import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai'; 
 import './ResourceDetailPage.css';
 
-const ResourceDetailPage = ({ accessToken }) => {
+const ResourceDetailPage = ({ accessToken, username }) => {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [resource, setResource] = useState(null);
   const [errorMessages, setErrorMessages] = useState('');
   const [commentInput, setCommentInput] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
+  const [showComments, setShowComments] = useState(false); // State to toggle comments visibility
   const baseUrl = `http://localhost:3500`;
 
   useEffect(() => {
@@ -35,6 +38,7 @@ const ResourceDetailPage = ({ accessToken }) => {
       if (response.ok) {
         const data = await response.json();
         setResource(data);
+        checkIfLiked(data);
       } else if (response.status === 204) {
         setResource(null);
       } else {
@@ -48,8 +52,20 @@ const ResourceDetailPage = ({ accessToken }) => {
     }
   };
 
+  const checkIfLiked = (resource) => {
+     console.log(resource)
+    if (resource.likesBy && resource.likesBy.includes(username)) {
+      setIsLiked(true);
+      console.log('hii', isLiked)
+    } else {
+      setIsLiked(false);
+      console.log('hi', isLiked)
+    }
+  };
+
   const handleAddComment = async () => {
     try {
+      setIsLoading(true);
       if (!commentInput.trim()) {
         toast.error('Please enter a comment');
         return;
@@ -77,11 +93,15 @@ const ResourceDetailPage = ({ accessToken }) => {
       }
     } catch (error) {
       setErrorMessages('Failed to add comment');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleLike = async () => {
     try {
+      setIsLoading(true); // Start loading state for immediate feedback
+
       const url = `${baseUrl}/resources/${id}/like`;
       const requestOptions = {
         method: 'PUT',
@@ -94,23 +114,33 @@ const ResourceDetailPage = ({ accessToken }) => {
       const response = await fetch(url, requestOptions);
 
       if (response.ok) {
-        toast.success('Liked successfully');
+        const result = await response.json();
+        toast.success(result.message);
+        setIsLiked(result.liked);
         fetchResourceById();
       } else {
         const errorMessages = await response.json();
         setErrorMessages(errorMessages);
       }
     } catch (error) {
-      setErrorMessages('Failed to like resource');
+      setErrorMessages('Failed to like/unlike resource');
+    } finally {
+      setIsLoading(false); // Stop loading state after operation completes
     }
   };
 
+  const toggleComments = () => {
+    setShowComments(!showComments);
+  };
+
   return (
-    <div id='resourceDetailPage'>
+    <div className='resource-detail-page'>
       <ToastContainer />
-      <div id='resourceDetailPageContainer'>
+      <div className='resource-detail-page-container'>
         {isLoading ? (
-          <ClipLoader id="resourceDetailPageSpinner" color={'#0426FA'} loading={isLoading} size={100} aria-label="Loading Spinner" data-testid="loader" />
+          <div className="resource-detail-page-spinner">
+            <ClipLoader color={'#0426FA'} loading={isLoading} size={100} aria-label="Loading Spinner" />
+          </div>
         ) : resource === null ? (
           <p style={{ margin: 20 }}>No resource found</p>
         ) : (
@@ -125,16 +155,23 @@ const ResourceDetailPage = ({ accessToken }) => {
             </div>
             <p className="resource-content">{resource.resourceContent}</p>
             <div className="comments-section">
-              <h3>Comments</h3>
-              {resource.comments && resource.comments.length > 0 ? (
-                resource.comments.map((comment, index) => (
-                  <div key={index} className="comment">
-                    <p>{comment.comment}</p>
-                    <p>Commented by: {comment.commentedBy}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No comments available</p>
+              <button className="toggle-comments-button" onClick={toggleComments}>
+                {showComments ? 'Hide Comments' : 'Show Comments'}
+              </button>
+              {showComments && (
+                <>
+                  <h3>Comments</h3>
+                  {resource.comments && resource.comments.length > 0 ? (
+                    resource.comments.map((comment, index) => (
+                      <div key={index} className="comment">
+                        <p>{comment.comment}</p>
+                        <p>Commented by: {comment.commentedBy}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No comments available</p>
+                  )}
+                </>
               )}
               <div className="add-comment-form">
                 <textarea
@@ -145,7 +182,11 @@ const ResourceDetailPage = ({ accessToken }) => {
                 <button onClick={handleAddComment}>Add Comment</button>
               </div>
               <div className="like-section">
-                <button onClick={handleLike}>Like</button>
+                <button className={`like-button ${isLiked ? 'liked' : ''}`} onClick={handleLike}>
+                  {isLiked ? <AiFillHeart color="red" /> : <AiOutlineHeart color="#ccc" />}
+                  {isLiked ? ' Unlike' : ' Like'}
+                </button>
+                {isLoading && <ClipLoader color={'#0426FA'} loading={isLoading} size={20} />}
               </div>
             </div>
           </div>

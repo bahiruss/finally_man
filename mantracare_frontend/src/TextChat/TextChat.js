@@ -18,6 +18,7 @@ const TextChat = ({ socket, accessToken, username, userRole }) => {
   const [isTherapistLoading, setIsTherapistLoading] = useState(true);
   const [isMessagesLoading, setIsMessagesLoading] = useState(true);
   const [isNoteLoading, setNoteIsLoading] = useState(false);
+  
 
 
   const [page, setPage] = useState(1);
@@ -438,7 +439,7 @@ const TextChat = ({ socket, accessToken, username, userRole }) => {
                       key={index}
                     >
                       <div className='message-box'>
-                      <div className="profile-pic">
+                      <div className="message-profile-pic">
                         {username !== message.senderUserName && profilePicSrc && (
                           <img
                             className='image-bubble'

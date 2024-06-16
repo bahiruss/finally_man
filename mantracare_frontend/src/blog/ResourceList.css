@@ -154,3 +154,37 @@
     text-decoration: none;
     color: inherit;
 }
+
+
+.resource-page-resource-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  
+  .resource-page-resource-actions button {
+    margin-left: 10px;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .resource-page-resource-actions button:first-child {
+    background-color: #dc3545; /* Red color for Delete button */
+    color: white;
+  }
+  
+  .resource-page-resource-actions button:last-child {
+    background-color: #007bff; /* Blue color for Update button */
+    color: white;
+  }
+  
+  .resource-page-resource-actions button:hover {
+    opacity: 0.8;
+  }
+  
+  

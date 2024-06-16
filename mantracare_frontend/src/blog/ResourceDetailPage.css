@@ -1,136 +1,157 @@
-/* Container for the entire resource detail page */
-#resourceDetailPage {
+.resource-detail-page {
     padding: 40px;
     background-color: #f9f9f9;
     min-height: 100vh;
     font-family: 'Arial', sans-serif;
-}
-
-/* Loader container */
-#resourceDetailPageSpinner {
+  }
+  
+  .resource-detail-page-spinner {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 300px;
-}
-
-/* Resource detail container */
-.resource-detail-container {
+  }
+  
+  .resource-detail-page-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .resource-detail-container {
     border: 1px solid #ccc;
     border-radius: 10px;
     padding: 20px;
     background-color: #fff;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Resource detail title */
-.resource-detail-container h2 {
+  }
+  
+  .resource-detail-container h2 {
     margin-top: 0;
     color: #333;
-}
-
-/* Resource detail content */
-.resource-detail-container .resource-content {
+    font-size: 24px;
+  }
+  
+  .resource-detail-container .meta {
+    font-size: 14px;
+    color: #999;
+    margin-top: 10px;
+  }
+  
+  .resource-detail-container .resource-content {
     color: #666;
     margin-top: 20px;
     line-height: 1.6;
-}
-
-/* Meta information */
-.resource-detail-container .meta {
-    font-size: 14px;
-    color: #999;
-    margin-top: 20px;
-}
-
-/* Comments section */
-.comments-section {
+  }
+  
+  .resource-detail-container .comments-section {
     margin-top: 30px;
-}
-
-.comments-section h3 {
+  }
+  
+  .resource-detail-container .comments-section h3 {
     color: #333;
-}
-
-.comments-section p {
-    color: #666;
-    border-top: 1px solid #ccc;
-    padding-top: 10px;
-}
-
-.comments-section .comment {
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .resource-detail-container .comments-section .comment {
     border-top: 1px solid #ccc;
     padding-top: 10px;
     margin-top: 10px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    padding: 15px;
-}
-
-.comments-section .comment p {
-    margin-bottom: 5px;
-}
-
-/* Add comment form */
-.add-comment-form {
+  }
+  
+  .resource-detail-container .comments-section .comment p {
+    color: #666;
+    margin: 5px 0;
+    font-size: 12px; /* Smaller font size for comments */
+  }
+  
+  .resource-detail-container .add-comment-form {
     margin-top: 20px;
-}
-
-.add-comment-form textarea {
+  }
+  
+  .resource-detail-container .add-comment-form textarea {
     width: 100%;
+    height: 80px;
     padding: 10px;
-    font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    outline: none;
     resize: vertical;
-}
-
-.add-comment-form button,
-.like-section button {
+    font-size: 14px;
+  }
+  
+  .resource-detail-container .add-comment-form button {
     margin-top: 10px;
     padding: 10px 20px;
-    font-size: 14px;
     border: none;
-    background-color: #007BFF;
-    color: #fff;
-    cursor: pointer;
     border-radius: 5px;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.add-comment-form button:hover,
-.like-section button:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-/* Apply animation to elements */
-#resourceDetailPageContainer {
-    animation: fadeIn 0.5s ease;
-}
-
-.comment {
-    animation: fadeIn 0.5s ease;
-    animation-delay: 0.1s;
-    animation-fill-mode: both;
-}
-
-.add-comment-form button,
-.like-section button {
-    animation: fadeIn 0.5s ease;
-    animation-delay: 0.3s;
-    animation-fill-mode: both;
-}
+    background-color: #0426FA;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .resource-detail-container .add-comment-form button:hover {
+    background-color: #021b8f;
+  }
+  
+  .resource-detail-container .like-section {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  
+  .resource-detail-container .like-section button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #fff; /* Default white color */
+    color: #0426FA; /* Blue color */
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .resource-detail-container .like-section button.liked {
+    background-color: rgba(255, 0, 0, 0.616); /* Red color for liked */
+    color: white; /* White text color */
+  }
+  
+  .resource-detail-container .like-section button:hover {
+    background-color: #021b8f; /* Darker blue on hover */
+  }
+  
+  .resource-detail-container .like-section button.liked:hover {
+    background-color: #e91e63; /* Darker pink on hover for liked */
+  }
+  
+  .resource-detail-container .like-section button .like-icon {
+    margin-right: 5px;
+  }
+  
+  .resource-detail-container .like-section button .clip-loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .toggle-comments-button {
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    background-color: #0426FA;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .toggle-comments-button:hover {
+    background-color: #021b8f;
+  }
+  

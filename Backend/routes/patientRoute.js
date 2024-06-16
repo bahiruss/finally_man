@@ -10,10 +10,15 @@ const patientRouter = (db) => {
     router.route('/')
         .get(patientController.getAllPatients)
         .post(upload.single('profilePic'), patientController.createPatient);
+
+    router.route('/userId/:id')
+        .get(patientController.getPatientByUserId);
+
     router.route('/:id')
         .get(patientController.getPatient)
         .put(upload.single('profilePic'), patientController.updatePatient)
         .delete(patientController.deletePatient)
+
 
     return router;
 }

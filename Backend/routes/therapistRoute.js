@@ -29,6 +29,9 @@ const therapistRouter = (db) => {
     router.route('/specialization')
         .get(therapistController.getTherapistBySpecialization);
 
+    router.route('/userId/:id')
+        .get(therapistController.getTherapistByUserId)
+
     router.route('/unapproved')
         .get(therapistController.getUnapprovedTherapists);
 

@@ -1,16 +1,18 @@
 class ForumPost {
-    constructor(postId, forumId, authorId, postContent, postTimeStamp, likes, comments) {
+    constructor(postId, forumId, authorId, postCreatorUsername, postContent, postTimeStamp, likes, likesBy, comments) {
         this._postId = postId;
         this._forumId = forumId;
         this._authorId = authorId;
+        this._postCreatorUsername = postCreatorUsername;
         this._postContent = postContent;
         this._postTimeStamp = postTimeStamp;
-        this._likes = likes;
-        this._comments = comments;
+        this._likes = likes || 0;
+        this._likesBy = likesBy || [];
+        this._comments = comments || [];
     }
 
-     // Getters
-     get postId() {
+    // Getters
+    get postId() {
         return this._postId;
     }
 
@@ -20,6 +22,10 @@ class ForumPost {
 
     get authorId() {
         return this._authorId;
+    }
+
+    get postCreatorUsername() {
+        return this._postCreatorUsername;
     }
 
     get postContent() {
@@ -32,6 +38,10 @@ class ForumPost {
 
     get likes() {
         return this._likes;
+    }
+
+    get likesBy() {
+        return this._likesBy;
     }
 
     get comments() {
@@ -51,6 +61,10 @@ class ForumPost {
         this._authorId = value;
     }
 
+    set postCreatorUsername(value) {
+        this._postCreatorUsername = value;
+    }
+
     set postContent(value) {
         this._postContent = value;
     }
@@ -61,6 +75,10 @@ class ForumPost {
 
     set likes(value) {
         this._likes = value;
+    }
+
+    set likesBy(value) {
+        this._likesBy = value;
     }
 
     set comments(value) {

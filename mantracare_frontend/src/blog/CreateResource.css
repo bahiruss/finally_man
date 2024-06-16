@@ -10,14 +10,19 @@
     font-family: 'Arial', sans-serif;
 }
 
+/* Form container */
+.create-resource-form-container {
+    width: 100%;
+    max-width: 800px;
+}
+
 /* Form styling */
 .create-resource-form {
     background: white;
     padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
     animation: fadeIn 1s ease-in-out;
 }
 

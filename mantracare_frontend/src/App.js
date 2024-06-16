@@ -28,6 +28,9 @@ import VideoSessionPage from './SessionPage/VideoSessionPage';
 import ResourcePage from './blog/ResourceList';
 import ResourceDetailPage from './blog/ResourceDetailPage';
 import CreateResource from './blog/CreateResourcePage';
+import MyResourcePage from './blog/MyResourcePage.js';
+import UpdateResourcePage from './blog/UpdateResourcePage.js';
+import ForumPage from './Forum/ForumPage.js';
 
 const socket = io('http://localhost:3500');
 
@@ -60,8 +63,12 @@ function App() {
       <Route path='/sessions/text'  element= {<TextSessionPage accessToken={accessToken}/>} />
       <Route path='/sessions/video'  element= {<VideoSessionPage accessToken={accessToken}/>} />
       <Route path='/resources'  element= {<ResourcePage accessToken={accessToken}/>} />
-      <Route path='/resources/:id'  element= {<ResourceDetailPage accessToken={accessToken}/>} />
+      <Route path='/resources/:id'  element= {<ResourceDetailPage username={username} accessToken={accessToken}/>} />
+      <Route path='/resources/:id/update'  element= {<UpdateResourcePage accessToken={accessToken} />} />
+      <Route path='/myresources'  element= {<MyResourcePage username={username} accessToken={accessToken}/>} />
       <Route path='/create/resources'  element= {<CreateResource accessToken={accessToken}/>} />
+      <Route path='/forum'  element= {<ForumPage username={username} accessToken={accessToken}/>} />
+      
     </Routes>
   </Router>
    )

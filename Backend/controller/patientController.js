@@ -64,6 +64,38 @@ class PatientController {
             if (!patient) {
                 return res.status(404).json({ 'message': 'Patient not found' });
             }
+            res.json(patient);
+            } catch (error) {
+            res.status(500).json({ 'message': 'Failed to fetch patient' });
+            }
+      }
+
+      getPatientByUserId = async (req, res) => {
+        try {
+            if (!req?.params?.id) {
+                return res.status(400).json({ 'message': 'ID parameter is required' });
+            }
+            const patientCollection = await this.db.getDB().collection('patients');
+            const patient = await patientCollection.findOne({ _userId: req.params.id },
+                {projection: {
+                    _id: 0, 
+                    userId: "$_userId", 
+                    username: "$_username",
+                    password: "$_password",
+                    email: "$_email",
+                    name: "$_name",
+                    dateOfBirth: "$_dateOfBirth",
+                    phoneNumber: "$_phoneNumber",
+                    registrationDate: "$_registrationDate",
+                    profilePic: "$_profilePic",
+                    patientId: "$_patientId",
+                    role: "$_role",
+                  },
+        });
+        
+            if (!patient) {
+                return res.status(404).json({ 'message': 'Patient not found' });
+            }
             console.log(patient)
             res.json(patient);
             } catch (error) {

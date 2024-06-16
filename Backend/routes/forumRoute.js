@@ -7,16 +7,25 @@ const forumRouter = (db) => {
     const forumController = new ForumController(db);
 
     router.route('/')
-        .get(forumController.getRecentForums)    // Get recent forums
-        .post(forumController.createForum);      // Create a new forum
+        .get(forumController.getRecentForums)    
+        .post(forumController.createForum);  
+        
+    router.route('/category/:category')
+    .get(forumController.getForumsByCategory)
+
+    router.route('/myforums')
+        .get(forumController.getMyForums)
+
+    router.route('/search')
+        .get(forumController.searchForums)
+
+    router.route('/like/:id')
+        .put(forumController.giveALike);
 
     router.route('/:id')
-        .get(forumController.getForumById)       // Get a forum by ID
-        .put(forumController.updateForum)        // Update a forum by ID
-        .delete(forumController.deleteForum);    // Delete a forum by ID
-
-    router.route('/:id/like')
-        .post(forumController.giveALike); 
+        .get(forumController.getForumById)       
+        .put(forumController.updateForum)        
+        .delete(forumController.deleteForum);     
 
     return router
 }
