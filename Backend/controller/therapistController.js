@@ -49,16 +49,18 @@ class TherapistController {
                     rating: roundedRating,
                 });
             }
-    
+            console.log(therapistsPlusRating)
             if (!therapistsPlusRating.length) return res.status(204).json({ 'message': 'No therapists found' });
             res.json(therapistsPlusRating);
         } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch therapists' });
+            console.log(error)
         }
     };
     
     getTherapistById = async (req, res) => {
         try {
+            console.log('hi')
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
@@ -146,14 +148,11 @@ class TherapistController {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
         }
     };
-    
     getTherapistByName = async (req, res) => {
         try {
-            if (!req?.body) {
-                return res.status(400).json({ 'message': 'Bad Request' });
-            }
+            const name = req.query.name || '';
             const therapistCollection = await this.db.getDB().collection('therapists');
-            const therapists = await therapistCollection.find({ _name: { $regex: new RegExp(req.body.name, 'i') }, _approved: true }, {
+            const therapists = await therapistCollection.find({ _name: { $regex: new RegExp(name, 'i') }, _approved: true }, {
                 projection: {
                     _id: 0,
                     userId: "$_userId",
@@ -174,7 +173,7 @@ class TherapistController {
             }).toArray();
     
             if (!therapists.length) {
-                return res.status(404).json({ 'message': 'Therapist not found' });
+                return res.status(204).json({ 'message': 'Therapist not found' });
             }
     
             const therapistsPlusRating = [];
@@ -194,9 +193,10 @@ class TherapistController {
             res.json(therapistsPlusRating);
         } catch (error) {
             res.status(500).json({ 'message': 'Failed to fetch therapist' });
-            console.log(error)
+            console.log(error);
         }
     };
+    
     
     getTherapistByAddress = async (req, res) => {
         try {

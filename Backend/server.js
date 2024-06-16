@@ -32,7 +32,7 @@ const PORT = process.env.PORT || 3500;
 
 app.use(credentials);
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,10 +43,11 @@ app.use(cookieParser());
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: ["http://localhost:3000", "http://localhost:5173"],
         methods: ["GET", "POST"],
     },
 });
+
 
 const db = new Database();
 
