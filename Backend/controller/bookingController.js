@@ -2,7 +2,7 @@ const Booking = require('../model/Booking');
 const { v4: uuidv4 } = require('uuid');
 const schedule = require('node-schedule');
 const NotificationController = require('./notificationController');
-class BookingController {
+ class BookingController {
     constructor (db) {
         this.db = db;
     } 
