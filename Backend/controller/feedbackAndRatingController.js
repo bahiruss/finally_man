@@ -7,30 +7,27 @@ class FeedbackAndRatingController {
     }
 
     getFeedbacks = async (req, res) => {
-        try{
-            const { page = 1, limit = 10 } = req.query;
-
+        try {
             const feedbackAndRatingCollection = await this.db.getDB().collection('feedbacksandratings');
 
-            const startIndex = (page - 1) * limit;
-            const endIndex = page * limit;
-
-            const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: req.params.id}, {
+            const feedbacks = await feedbackAndRatingCollection.find({ _therapistId: req.params.id }, {
                 projection: {
                     _id: 0,
-                    feedbackID: "$_feedbackId", 
+                    feedbackId: "$_feedbackId",
                     raterId: "$_raterId",
                     raterName: "$_raterName",
-                    therapistId: "$_therapistId", 
+                    therapistId: "$_therapistId",
                     rating: "$_rating",
                     comment: "$_comment",
                     timeStamp: "$_timeStamp",
                 }
-            }).sort({ _resourceTimeStamp: -1 }).skip(startIndex).limit(limit).toArray();
+            }).toArray();
 
             if (!feedbacks.length) return res.status(204).json({ message: 'No feedbacks found' });
 
-            res.json(feedbacks);
+            const totalFeedbacks = await feedbackAndRatingCollection.countDocuments({ _therapistId: req.params.id });
+
+            res.json({ feedbacks, totalFeedbacks });
 
         } catch (error) {
             res.status(500).json({ message: 'Failed to fetch feedbacks' });
@@ -108,7 +105,6 @@ class FeedbackAndRatingController {
                 const patientCollection = await this.db.getDB().collection('patients');
 
                 const patient = await patientCollection.findOne({ _userId: feedbackData.userId });
-
                 //check if the patient exists
                 if(!patient) return res.status(404).json({ message: 'Patient can not be found'});
 
@@ -134,11 +130,13 @@ class FeedbackAndRatingController {
                 feedbackAndRating.timeStamp = new Date();
 
                 await feedbackAndRatingCollection.insertOne(feedbackAndRating);
+                console.log('hi', feedbackAndRating)
                 res.status(201).json({ message: 'feedback and rating created successfully', createdFeedbackAndRating: feedbackAndRating});
 
 
             } catch (error) {
                 res.status(500).json({ message: 'Failed to create feedback'});
+                console.log(error)
             }
     }
 

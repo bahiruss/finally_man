@@ -9,8 +9,10 @@ class ScheduleController {
     getScheduleByTherapistId = async (req, res) => {
         try {
             if (!req?.params?.id) {
+                
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
+            console.log('1')
             const therapistId = req.params.id;
             const scheduleCollection = await this.db.getDB().collection('schedules');
             const schedule = await scheduleCollection.findOne({ _therapistId: therapistId },
@@ -21,9 +23,11 @@ class ScheduleController {
                     oneOnOneAvailability: "$_oneOnOneAvailability",
                     groupAvailability: "$_groupAvailability"
                 }});
+                console.log('2')
                 if (!schedule) {
                     return res.status(404).json({ 'message': 'schedule not found' });
                 }
+                console.log('hi', schedule)
             res.json(schedule);
         } catch (error) {
             console.error('Error fetching schedule by therapist ID:', error);

@@ -60,7 +60,7 @@ class TherapistController {
     
     getTherapistById = async (req, res) => {
         try {
-            console.log('hi')
+            
             if (!req?.params?.id) {
                 return res.status(400).json({ 'message': 'ID parameter is required' });
             }
@@ -87,7 +87,6 @@ class TherapistController {
                     approved: "$_approved"
                 },
             });
-    
             if (!therapist) {
                 return res.status(404).json({ 'message': 'Therapist not found or not approved' });
             }

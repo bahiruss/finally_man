@@ -8,10 +8,6 @@ const feedbackRouter = (db) => {
 
     router.route('/')
         .post(feedbackAndRatingController.createFeedback);
-    router.route('/:id')
-        .get(feedbackAndRatingController.getFeedbackById)
-        .put(feedbackAndRatingController.updateFeedback)
-        .delete(feedbackAndRatingController.deleteFeedback);
 
     router.route('/therapist/:id')
     .get(feedbackAndRatingController.getFeedbacks);
@@ -19,6 +15,10 @@ const feedbackRouter = (db) => {
     router.route('/rating/therapist/:id')
         .get(feedbackAndRatingController.getFeedbackByRating);
 
+    router.route('/:id')
+        .get(feedbackAndRatingController.getFeedbackById)
+        .put(feedbackAndRatingController.updateFeedback)
+        .delete(feedbackAndRatingController.deleteFeedback);
     return router
 }
 

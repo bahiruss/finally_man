@@ -10,13 +10,14 @@ const scheduleRouter = (db) => {
     router.route('/')
         .post(scheduleController.createSchedule);
 
+    router.route('/therapist/:id')
+        .get(scheduleController.getScheduleByTherapistId);
+    
     router.route('/:id')
         .put(scheduleController.updateSchedule)
         .delete(scheduleController.deleteSchedule);
 
-    router.route('/therapist/:id')
-        .get(scheduleController.getScheduleByTherapistId);
-
+   
 
     return router;
 }
